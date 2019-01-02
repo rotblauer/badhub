@@ -1,0 +1,60 @@
+<html>
+	<head>
+		<meta charset="UTF-8"> 
+	</head>
+	<body>
+		<style>
+			.details {
+				display: none;
+			}
+			table tbody tr {
+				margin-bottom: 12px;
+			}
+			.bold {
+				font-weight: bold;
+			}
+			td {
+				vertical-align: baseline;
+			}
+		</style>
+		<div id="main" style="display: none;">
+			<input type="text" id="input-query" style="width: 90vw;">
+			<button id="input-enter-query">snoop</button>
+			<p id="showdetails">show details</p>
+
+			<div style="position: fixed; top: 50; right: 0; ">
+				<span id="eventTypes-toggleall"><i>toggle all</i></span>
+				<br>
+				<br>
+				toggle:
+				<div id="eventTypes"></div>	
+				<hr>
+				<span id="entities-toggleall"><i>toggle all</i></span>
+				<br>
+				<br>
+				toggle:
+				<div id="entities" style="" ></div>
+			</div>
+
+			
+
+			<div id="response"></div>
+		</div>
+
+		<div id="login">
+			<h1>enter a github api key</h1>
+			<p class="error" style="display: none;">you have to have one</p>
+			<input id="input-apikey" type="text">
+			<button id="input-enter-apikey">enter</button>
+		</div>
+
+		<!-- scripts -->
+		<script
+			  src="https://code.jquery.com/jquery-3.3.1.min.js"
+			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+			  crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
+		<script src="moment.min.js"></script>
+		<script src="app.js"></script>
+	</body>
+</html>
