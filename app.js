@@ -21,7 +21,7 @@ var formatPayload = function(eventType, data) {
 		case "PushEvent":
 			for (var i = 0; i < data.payload.commits.length; i++) {
 				var c = data.payload.commits[i];
-				out = `<i>${data.payload.ref}</i> <span><a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" style="display: block;">* ${c.sha.substring(0,8)}</a>&nbsp;&nbsp;<code>${c.message}</code></span>
+				out += `<i>${data.payload.ref}</i> <span><a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" style="display: block;">* ${c.sha.substring(0,8)}</a>&nbsp;&nbsp;<code>${c.message}</code></span>
 				`
 			}
 			break;
