@@ -18,21 +18,22 @@
 			}
 		</style>
 		<div id="main" style="display: none;">
+			<small class="instructions" style="color:green;"><strong>example:</strong> <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
 			<input type="text" id="input-query" style="width: 90vw;">
 			<button id="input-enter-query">snoop</button>
-			<p id="showdetails">show details</p>
+			<p id="showdetails"><i>show details</i></p>
 
-			<div style="position: fixed; top: 50; right: 0; ">
-				<span id="eventTypes-toggleall"><i>toggle all</i></span>
+			<div style="position: fixed; top: 50; right: 0; height: 80vh; overflow-y: scroll; ">
+				<a id="eventTypes-toggleall"><i>toggle all events</i></a>
 				<br>
 				<br>
-				toggle:
+				toggle events:
 				<div id="eventTypes"></div>	
 				<hr>
-				<span id="entities-toggleall"><i>toggle all</i></span>
+				<a id="entities-toggleall"><i>toggle all entities</i></a>
 				<br>
 				<br>
-				toggle:
+				toggle entities:
 				<div id="entities" style="" ></div>
 			</div>
 
@@ -42,7 +43,8 @@
 		</div>
 
 		<div id="login">
-			<h1>enter a github api key</h1>
+			<h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/" target="_">a github api token</a></h1>
+			<blockquote>this will only be stored in <code>localStorage</code></blockquote>
 			<p class="error" style="display: none;">you have to have one</p>
 			<input id="input-apikey" type="text">
 			<button id="input-enter-apikey">enter</button>

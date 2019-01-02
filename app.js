@@ -1,4 +1,5 @@
 var apikey = "";
+var pageLimit = 2; // 30 events per page // TODO FIXME add a user-configurable feature here
 
 var actionColor = function(action) {
 	switch (action) {
@@ -8,6 +9,8 @@ var actionColor = function(action) {
 			return "green";
 		case "closed":
 			return "red";
+		case "published":
+			return "green";
 	}
 	return "#ddd";
 }
@@ -35,20 +38,20 @@ var formatPayload = function(eventType, data) {
 			break;
 		case "IssuesEvent":
 			out = `
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}:</span>
-			<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number} ${data.payload.issue.title}</a>
+			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span>
+			<a href="${data.payload.issue.html_url}" target="_">(#${data.payload.issue.number}) ${data.payload.issue.title}</a>
 			`;
 			break;
 		case "PullRequestEvent":
 			out = `
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}:</span>
-			<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.number} ${data.payload.pull_request.title}</a>
+			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span>
+			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.number}) ${data.payload.pull_request.title}</a> <i>[${data.payload.pull_request.base.label}/${data.payload.pull_request.head.label}]</i> 
 			`;
 			break;
 		case "IssueCommentEvent":
 			out = `
 
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}:</span> <span style="color: #bbb">@</span> <a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number} ${data.payload.issue.title}</a> 
+			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span> <span style="color: #bbb">@</span> <a href="${data.payload.issue.html_url}" target="_">(#${data.payload.issue.number}) ${data.payload.issue.title}</a> 
 
 			<blockquote style="color: #aaa;">
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + " [...]" : data.payload.comment.body}
@@ -57,17 +60,43 @@ var formatPayload = function(eventType, data) {
 			`;
 			break;
 		case "PullRequestReviewEvent":
-			break;
 		case "PullRequestReviewCommentEvent":
+
 			out = `
 
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}:</span> <span style="color: #bbb">@</span> <a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.pull_request.number}:${data.payload.pull_request.title}</a> 
+			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span> <span style="color: #bbb">@</span> <a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.pull_request.number}) ${data.payload.pull_request.title}</a> <i>[${data.payload.pull_request.base.label}/${data.payload.pull_request.head.label}]</i> 
 
 			<blockquote style="color: #aaa;">
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + " [...]" : data.payload.comment.body}
 			<a href="${data.payload.comment.html_url}" target="_"><sup>link</sup></a>
 			</blockquote>
 			`;
+			break;
+		case "CommitCommentEvent":
+			out = `
+			<span style="color: #bbb">@</span> <a href="${data.payload.comment.html_url}" target="_">link</a> 
+
+			<blockquote style="color: #aaa;">
+			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + "[...]" : data.payload.comment.body}
+			</blockquote>
+
+			`	
+			break;
+		case "ReleaseEvent":
+			out = `
+			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span> <a href="${data.payload.release.html_url}">${data.payload.release.tag_name}: ${data.payload.release.name}</a>
+			<blockquote>
+			<code>
+			${data.payload.release.body}
+			</code>
+			</blockquote>
+			`	
+			break;
+		case "MemberEvent":
+			out = `
+			<img src="${data.payload.member.avatar_url}" style="display: inline-block; max-height: 1em; margin-right: 5px;"/>
+			<a href="https://github.com/${data.payload.member.login}" target="_">${data.payload.member.login}</a>
+			`
 			break;
 		default:
 			out = `⚠️`;
@@ -92,7 +121,7 @@ var formatEventName = function(eventName) {
 			n += `❌ `;
 			break;
 		case "WatchEvent":
-			n += `💛`;
+			n += `⭐️`;
 			break;
 		case "IssuesEvent":
 			n += `🔖`;
@@ -109,16 +138,25 @@ var formatEventName = function(eventName) {
 		case "PullRequestReviewCommentEvent":
 			n += `🖍`;
 			break;
+		case "CommitCommentEvent":
+			n += '💬';
+			break;
+		case "ReleaseEvent":
+			n += '🔊';
+			break;
+		case "MemberEvent":
+			n += '🚼';
+			break;
 	}
 	n += " " + eventName.replace("Event", "");
 	return n;
 };
 
 var times = [];
+var eventIDs = [];
 
 var insertTimesYieldsI = function(t) {
 	var didInsert = 0;
-	console.log("asfd");
 	if (times.length === 0) {
 		times.push(t);
 		return didInsert;
@@ -139,7 +177,7 @@ var buildRow = function(d) {
 	return $(`<tr class="event${d.type} entity${d.actor.login}">
 	<td>
 		<img src="${d.actor.avatar_url}" style="max-height: 1em;" />
-		${d.actor.login}
+		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
 	</td>
 	<td style="color: #ccc;">
 		${moment(d.created_at).fromNow()}
@@ -218,6 +256,10 @@ var snoopOK = function(data) {
 					)
 			}
 			// add row to table
+			if (eventIDs.indexOf(d.id) >= 0) {
+				return;
+			}
+			eventIDs.push(d.id);
 			var j = insertTimesYieldsI(d.created_at);
 			if (j === 0) {
 				$(`#tabledata`)
@@ -235,6 +277,7 @@ var snoopOK = function(data) {
 };
 var snoopNOTOK = function(err) {
 	console.error(err);
+	$(".instructions").show();
 }
 
 var doSnoop = function(query) {
@@ -243,6 +286,7 @@ var doSnoop = function(query) {
 	console.log("snooping", query);
 	localStorage.setItem("gh-man-snoop-query", query);
 	times = [];
+	$(".instructions").hide();
 	var qs = query.split(",");
 	if (qs.length === 0) {
 		if (query !== "") {
@@ -250,18 +294,21 @@ var doSnoop = function(query) {
 		}
 	}
 	for (var i = 0; i < qs.length; i++) {
-		(function(q) {
-			$.ajax({
-				url: `https://api.github.com/${q}/events?access_token=${apikey}`,
-				dataType: 'json',
-				type: "GET",
-				// type: 'POST',
-				contentType: 'application/json',
-				// data: JSON.stringify(data),
-				success: snoopOK,
-				error: snoopNOTOK,
-			});
-		})(qs[i])
+		for (var page = 1; page <= pageLimit; page++) {
+			(function(q) {
+				$.ajax({
+					url: `https://api.github.com/${q}/events?access_token=${apikey}&page=${page}`,
+					dataType: 'json',
+					type: "GET",
+					// type: 'POST',
+					contentType: 'application/json',
+					// data: JSON.stringify(data),
+					success: snoopOK,
+					error: snoopNOTOK,
+				});
+			})(qs[i])
+		}
+
 	}
 };
 
