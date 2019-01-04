@@ -2,7 +2,7 @@
 	<head>
 		<meta charset="UTF-8"> 
 	</head>
-	<body>
+	<body class="">
 		<style>
 			.details {
 				display: none;
@@ -26,12 +26,26 @@
 				max-height: 3em;
 				overflow-y: scroll;
 			}
+			body.darktheme {
+				background-color: black;
+				color: white;
+			}
+			body.darktheme a {
+				color: lightblue;
+			}
+			body.darktheme a.commit {
+				color: #eee;
+			}
 		</style>
 		<div id="main" style="display: none;">
 			<small class="instructions" style="color:green;"><strong>example:</strong> <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
 			<input type="text" id="input-query" style="width: 90vw;">
 			<button id="input-enter-query">snoop</button>
-			<p id="showdetails"><i>show details</i></p>
+			<p>
+				<span id="showdetails"><i>show details</i></span>|
+				<span id="toggle-darktheme">toggle dark theme</span>
+			</p>
+			
 
 			<div style="position: fixed; top: 50; right: 0; height: 80vh; overflow-y: scroll; ">
 				<a id="eventTypes-toggleall"><i>toggle all events</i></a>

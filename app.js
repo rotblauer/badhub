@@ -389,6 +389,20 @@ var setupLoginListeners = function() {
 	});
 };
 
+var handleTheme = function(isDark) {
+	if (isDark) {
+		if (!$("body").hasClass("darktheme")) {
+			$("body").addClass("darktheme")
+		}
+		localStorage.setItem("badhub-darktheme", "1")
+	} else {
+		if ($("body").hasClass("darktheme")) {
+			$("body").removeClass("darktheme")
+		}
+		localStorage.setItem("badhub-darktheme", "")
+	}
+};
+
 var setupAuthorizedListeners = function() {
 	$("#input-enter-query").on("click", function() {
 		console.log("clickaed");
@@ -411,6 +425,9 @@ var setupAuthorizedListeners = function() {
 			$(this).toggleClass("bold");
 		});
 	});
+	$("#toggle-darktheme").on("click", function(e) {
+		handleTheme(!$("body").hasClass("darktheme"));
+	});
 };
 
 var authorized = function() {
@@ -426,6 +443,8 @@ var authorized = function() {
 
 $(function () {
 	setupLoginListeners();
+	var storedThemePref = localStorage.getItem("badhub-darktheme");
+	handleTheme(storedThemePref !== null && storedThemePref !== "");
 	var getKey = localStorage.getItem("badhub-apikey");
 	if (getKey === null || getKey === "") {
 		$("#login .error").show();
@@ -433,6 +452,7 @@ $(function () {
 		apikey = getKey;
 		authorized();
 	}
+
 
 	// var pathname = window.location.hash;
 	// $(".this-location").text(window.location.host);
