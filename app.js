@@ -7,6 +7,8 @@ var actionColor = function(action) {
 			return "green";
 		case "opened":
 			return "green";
+		case "reopened":
+			return "lightgreen";
 		case "edited":
 			return "orange";
 		case "closed":
