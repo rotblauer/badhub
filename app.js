@@ -7,6 +7,8 @@ var actionColor = function(action) {
 			return "green";
 		case "opened":
 			return "green";
+		case "edited":
+			return "orange";
 		case "closed":
 			return "red";
 		case "published":
@@ -65,16 +67,19 @@ var formatPayload = function(eventType, data) {
 			for (var i = 0; i < cr.length; i++) {
 				out += (function(c) {
 					return `
-					<div id="${c.sha}" class="commit" style="background-color: rgba(240,240,240,0.5); border-bottom: 4px solid white; padding: 10px;">
+					<div id="${c.sha}" class="commit">
 					<!-- <small data-sha="${c.sha}" class="commit-expander" style="float:right;">&lt;/&gt;</small> -->
-					<a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit" style="font-size: 0.8em;">${c.sha.substring(0,8)} <span><i>${data.payload.ref}</i></span></a>
-					<code style="display: block; padding: 10px;">${c.message}</code>
+					<pre style="padding: 1em 1em 0 1em; margin-bottom: 0;">
+					<code style="display: block;">${c.message}</code>
+					</pre>
+					<a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit" style="font-size: 0.8em; text-align:right; display: block;">${c.sha.substring(0,8)}&nbsp;
+					<span><i>${data.payload.ref.replace("refs/heads/", "")}</i></span></a>
 					</div>
 					`;
 				})(cr[i]);
 			}
 			break;
-		case "CreateEvent":
+		case "CreateEvent":	
 			out = `${data.payload.ref_type}: ${data.payload.ref}`;
 			break;
 		case "ForkEvent":
@@ -98,7 +103,7 @@ var formatPayload = function(eventType, data) {
 			<span style="color: ${actionColor(action)};">${action}</span>
 			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.number}) ${data.payload.pull_request.title}</a> 
 			<span style="float: right; font-size: 0.8em;"><span style="color: green;">+${data.payload.pull_request.additions}</span>/<span style="color: red;">-${data.payload.pull_request.deletions}</span>,<span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
-			<span><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
+			<span style="color: ${actionColor(data.payload.action)};display: block; text-align: right;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
 			`;
 			for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
 				out += (function(l) {
@@ -124,7 +129,9 @@ var formatPayload = function(eventType, data) {
 
 			out = `
 
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span> <span style="color: #bbb">@</span> <a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.pull_request.number}) ${data.payload.pull_request.title}</a> <i>[${data.payload.pull_request.base.label}/${data.payload.pull_request.head.label}]</i> 
+			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span>
+			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.pull_request.number}) ${data.payload.pull_request.title}</a> 
+			<span style="color: ${actionColor(data.payload.action)}; display: block; text-align: right;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
 
 			<blockquote style="color: #aaa;">
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + " [...]" : data.payload.comment.body}
@@ -157,6 +164,19 @@ var formatPayload = function(eventType, data) {
 			<img src="${data.payload.member.avatar_url}" style="display: inline-block; max-height: 1em; margin-right: 5px;"/>
 			<a href="https://github.com/${data.payload.member.login}" target="_">${data.payload.member.login}</a>
 			`
+			break;
+		case "GollumEvent":
+		// wiki. weird name for an event.
+			var cr = data.payload.pages.reverse();
+			for (var i = 0; i < cr.length; i++) {
+				out += (function(c) {
+					return `
+					<span style="color: ${actionColor(c.action)}">${c.action}</span>
+					<a href="${c.html_url}" target="_">${c.page_name}</a>
+					<span><i>${c.sha.substring(0, 9)}</i></span>
+					`;
+				})(cr[i]);
+			}
 			break;
 		default:
 			out = `⚠️`;
@@ -207,6 +227,9 @@ var formatEventName = function(data) {
 			break;
 		case "MemberEvent":
 			n += '🚼';
+			break;
+		case "GollumEvent":
+			n += `📜`;
 			break;
 	}
 	n += " " + data.type.replace("Event", "");
