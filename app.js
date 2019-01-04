@@ -216,6 +216,27 @@ var formatEventName = function(data) {
 
 var times = [];
 var eventIDs = [];
+var eventTypesPreferHidden = [];
+
+var eventTypeIsPreferredHidden = function(eventType) {
+	return eventTypesPreferHidden.indexOf(eventType) > -1;
+};
+var loadEventTypePrefs = function() {
+	var l = localStorage.getItem("badhub-eventtypeshidden");
+	if (l === null || l === "") {
+		return;
+	}
+	eventTypesPreferHidden = JSON.parse(l);
+};
+var storeEventTypeHiddenPref = function(eventType) {
+	var i = eventTypesPreferHidden.indexOf(eventType);
+	if (i > -1) {
+		eventTypesPreferHidden.splice(i, 1);
+	} else {
+		eventTypesPreferHidden.push(eventType);
+	}
+	localStorage.setItem("badhub-eventtypeshidden", JSON.stringify(eventTypesPreferHidden));
+};
 
 var insertTimesYieldsI = function(t) {
 	var didInsert = 0;
@@ -237,7 +258,7 @@ var insertTimesYieldsI = function(t) {
 
 var buildRow = function(d) {
 	return $(`
-	<tr class="event${d.type} entity${d.actor.login}">
+	<tr class="event${d.type} entity${d.actor.login} ${eventTypeIsPreferredHidden(d.type) ? 'hidden' : ''}">
 	<td style="color: #ccc;">
 		${minimalTimeDisplay(moment(d.created_at))}
 	</td>
@@ -290,6 +311,7 @@ var snoopOK = function(data) {
 	for (var i = 0; i < data.length; i++) {
 		(function(d) {
 			// add uniq event type for filtering
+			var preferredHidden = eventTypeIsPreferredHidden(d.type);
 			if ($(`#eventTypes #${d.type}`).length === 0) {
 				$("#eventTypes")
 					.append(
@@ -299,9 +321,11 @@ var snoopOK = function(data) {
 							.css({
 								"display": "block"
 							})
-							.addClass("bold")
+							// .addClass("bold")
+							.addClass(`${preferredHidden ? "" : "bold"}`)
 							.on("click", function(e) {
-								$(`.event${d.type}`).toggle();
+								$(`.event${d.type}`).toggleClass("hidden");
+								storeEventTypeHiddenPref(d.type);
 								$(this).toggleClass("bold");
 							})
 					)
@@ -336,11 +360,6 @@ var snoopOK = function(data) {
 			}
 		})(data[i])
 	}
-	// $(".commit-expander").on("click", function(e) {
-	// 	console.log("clik");
-	// 	var csha = $(this).data("sha");
-	// 	$(`#${csha}`).toggleClass("unexpanded");
-	// });
 };
 var snoopNOTOK = function(err) {
 	console.error(err);
@@ -350,6 +369,7 @@ var snoopNOTOK = function(err) {
 var doSnoop = function(query) {
 	$("#response").html("");
 	$("#entities").html("");
+	$("#eventTypes").html("");
 	console.log("snooping", query);
 	localStorage.setItem("badhub-query", query);
 	times = [];
@@ -367,15 +387,12 @@ var doSnoop = function(query) {
 					url: `https://api.github.com/${q}/events?access_token=${apikey}&page=${page}`,
 					dataType: 'json',
 					type: "GET",
-					// type: 'POST',
 					contentType: 'application/json',
-					// data: JSON.stringify(data),
 					success: snoopOK,
 					error: snoopNOTOK,
 				});
 			})(qs[i])
 		}
-
 	}
 };
 
@@ -436,6 +453,7 @@ var authorized = function() {
 	var existingQ = localStorage.getItem("badhub-query");
 	$("#input-query").val(existingQ);
 	setupAuthorizedListeners();
+	loadEventTypePrefs();
 	if (existingQ !== "" && existingQ !== null) {
 		doSnoop(existingQ);
 	}
