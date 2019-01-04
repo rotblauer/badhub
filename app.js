@@ -351,7 +351,7 @@ var doSnoop = function(query) {
 	$("#response").html("");
 	$("#entities").html("");
 	console.log("snooping", query);
-	localStorage.setItem("gh-man-snoop-query", query);
+	localStorage.setItem("badhub-query", query);
 	times = [];
 	$(".instructions").hide();
 	var qs = query.split(",");
@@ -383,7 +383,7 @@ var setupLoginListeners = function() {
 	$("#input-enter-apikey").on("click", function() {
 		apikey = $("#input-apikey").val();
 		if (apikey !== "") {
-			localStorage.setItem("gh-man-snoop-apikey", apikey);
+			localStorage.setItem("badhub-apikey", apikey);
 			authorized();
 		}
 	});
@@ -416,7 +416,7 @@ var setupAuthorizedListeners = function() {
 var authorized = function() {
 	$("#login").hide();
 	$("#main").show();
-	var existingQ = localStorage.getItem("gh-man-snoop-query");
+	var existingQ = localStorage.getItem("badhub-query");
 	$("#input-query").val(existingQ);
 	setupAuthorizedListeners();
 	if (existingQ !== "" && existingQ !== null) {
@@ -426,7 +426,7 @@ var authorized = function() {
 
 $(function () {
 	setupLoginListeners();
-	var getKey = localStorage.getItem("gh-man-snoop-apikey");
+	var getKey = localStorage.getItem("badhub-apikey");
 	if (getKey === null || getKey === "") {
 		$("#login .error").show();
 	} else {
