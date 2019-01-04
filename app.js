@@ -367,9 +367,9 @@ var snoopNOTOK = function(err) {
 }
 
 var doSnoop = function(query) {
-	$("#response").html("");
-	$("#entities").html("");
-	$("#eventTypes").html("");
+	$("#response").empty();
+	$("#entities").empty();
+	$("#eventTypes").empty();
 	console.log("snooping", query);
 	localStorage.setItem("badhub-query", query);
 	times = [];
