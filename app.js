@@ -11,18 +11,67 @@ var actionColor = function(action) {
 			return "red";
 		case "published":
 			return "green";
+		case "merged":
+			return "purple";
 	}
 	return "#ddd";
+}
+
+// accepts _moment()_ time
+var minimalTimeDisplay = function(time) {
+    return time.fromNow(true).replace("a few seconds", "0m").replace("a ", "1").replace("an", "1").replace("hours", "h").replace("hour", "h").replace("minutes", "m").replace("minute", "m").replace(" ","").replace("days","d").replace("day", "d").replace("months", "M").replace("month", "M");
+}
+
+// https://stackoverflow.com/a/35970186/4401322
+function padZero(str, len) {
+    len = len || 2;
+    var zeros = new Array(len).join('0');
+    return (zeros + str).slice(-len);
+}
+
+function invertColor(hex, bw) {
+    if (hex.indexOf('#') === 0) {
+        hex = hex.slice(1);
+    }
+    // convert 3-digit hex to 6-digits.
+    if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    if (hex.length !== 6) {
+        throw new Error('Invalid HEX color.');
+    }
+    var r = parseInt(hex.slice(0, 2), 16),
+        g = parseInt(hex.slice(2, 4), 16),
+        b = parseInt(hex.slice(4, 6), 16);
+    if (bw) {
+        // http://stackoverflow.com/a/3943023/112731
+        return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+            ? '#000000'
+            : '#FFFFFF';
+    }
+    // invert color components
+    r = (255 - r).toString(16);
+    g = (255 - g).toString(16);
+    b = (255 - b).toString(16);
+    // pad each with zeros and return
+    return "#" + padZero(r) + padZero(g) + padZero(b);
 }
 
 var formatPayload = function(eventType, data) {
 	var out = "";
 	switch (eventType) {
 		case "PushEvent":
-			for (var i = 0; i < data.payload.commits.length; i++) {
-				var c = data.payload.commits.reverse()[i];
-				out += `<i>${data.payload.ref}</i> <span><a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" style="display: block;">* ${c.sha.substring(0,8)}</a>&nbsp;&nbsp;<code>${c.message}</code></span>
-				`
+			var cr = data.payload.commits.reverse();
+			for (var i = 0; i < cr.length; i++) {
+				out += (function(c) {
+					return `
+					<div id="${c.sha}" class="commit" style="background-color: rgba(240,240,240,0.5); border-bottom: 4px solid white; padding: 10px;">
+					<!-- <small data-sha="${c.sha}" class="commit-expander" style="float:right;">&lt;/&gt;</small> -->
+					<a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit" style="font-size: 0.8em;">${c.sha.substring(0,8)} <span><i>${data.payload.ref}</i></span></a>
+					<code style="display: block; padding: 10px;">${c.message}</code>
+					</div>
+					`;
+				})(cr[i]);
 			}
 			break;
 		case "CreateEvent":
@@ -43,10 +92,19 @@ var formatPayload = function(eventType, data) {
 			`;
 			break;
 		case "PullRequestEvent":
+			var action = data.payload.action === "closed" && data.payload.pull_request.merged ? "merged" : data.payload.action;
+
 			out = `
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span>
-			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.number}) ${data.payload.pull_request.title}</a> <i>[${data.payload.pull_request.base.label}/${data.payload.pull_request.head.label}]</i> 
+			<span style="color: ${actionColor(action)};">${action}</span>
+			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.number}) ${data.payload.pull_request.title}</a> 
+			<span style="float: right; font-size: 0.8em;"><span style="color: green;">+${data.payload.pull_request.additions}</span>/<span style="color: red;">-${data.payload.pull_request.deletions}</span>,<span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
+			<span><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
 			`;
+			for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
+				out += (function(l) {
+					return `<small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small>`;
+				})(data.payload.pull_request.labels[j]);
+			}
 			break;
 		case "IssueCommentEvent":
 			out = `
@@ -60,6 +118,8 @@ var formatPayload = function(eventType, data) {
 			`;
 			break;
 		case "PullRequestReviewEvent":
+			out = `<h1 style="color: yellow;">PullRequestReviewEvent NOT IMPLEMENTED</h1>`;
+			break;
 		case "PullRequestReviewCommentEvent":
 
 			out = `
@@ -105,8 +165,9 @@ var formatPayload = function(eventType, data) {
 	return out;
 }
 
-var formatEventName = function(eventName) {
+var formatEventName = function(data) {
 	var n = "" ; 
+	var eventName = data.type;
 	switch (eventName) {
 		case "PushEvent":
 			n += `⬆️`;
@@ -148,7 +209,8 @@ var formatEventName = function(eventName) {
 			n += '🚼';
 			break;
 	}
-	n += " " + eventName.replace("Event", "");
+	n += " " + data.type.replace("Event", "");
+
 	return n;
 };
 
@@ -174,19 +236,23 @@ var insertTimesYieldsI = function(t) {
 };
 
 var buildRow = function(d) {
-	return $(`<tr class="event${d.type} entity${d.actor.login}">
+	return $(`
+	<tr class="event${d.type} entity${d.actor.login}">
+	<td style="color: #ccc;">
+		${minimalTimeDisplay(moment(d.created_at))}
+	</td>
 	<td>
 		<img src="${d.actor.avatar_url}" style="max-height: 1em;" />
 		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
-	</td>
-	<td style="color: #ccc;">
-		${moment(d.created_at).fromNow()}
 	</td>
 	<td style="text-align: right; padding-right: 5px;">
 		<a href="https://github.com/${d.repo.name}" target="_">${d.repo.name}</a>
 	</td>
 	<td style="max-width: 500px; border-left: 3px solid #eee; padding: 5 5 5 10;">
-		<span>${formatEventName(d.type)}</span>
+		<span>
+		${formatEventName(d)}
+		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length + " commits" : ""}</span>
+		</span>
 	<!-- </td> -->
 
 	<!-- <td> -->
@@ -196,7 +262,8 @@ var buildRow = function(d) {
 	<td class="details" style="font-size: 0.8em; ">
 		<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d.payload, null, 4)}</code>
 	</td>
-	</tr>`);
+	</tr>
+	`);
 }
 
 var snoopOK = function(data) {
@@ -206,8 +273,8 @@ var snoopOK = function(data) {
 					<table>
 						<thead>
 						<tr>
-							<th>entity</th>
 							<th>date</th>
+							<th>entity</th>
 							<th>location</th>
 							<th>event</th>
 							<!-- <th>info</th> -->
@@ -228,7 +295,7 @@ var snoopOK = function(data) {
 					.append(
 						$(`<span></span>`)
 							.attr("id", `${d.type}`)
-							.html(formatEventName(d.type))
+							.html(formatEventName(d))
 							.css({
 								"display": "block"
 							})
@@ -261,19 +328,19 @@ var snoopOK = function(data) {
 			}
 			eventIDs.push(d.id);
 			var j = insertTimesYieldsI(d.created_at);
+			var row = buildRow(d);
 			if (j === 0) {
-				$(`#tabledata`)
-					.prepend(
-						buildRow(d)
-					)
+				$(`#tabledata`).prepend(row)
 			} else {
-				$(`#tabledata > tr:nth-child(${j})`)
-					.after(
-						buildRow(d)
-					)
+				$(`#tabledata > tr:nth-child(${j})`).after(buildRow(d))
 			}
 		})(data[i])
 	}
+	// $(".commit-expander").on("click", function(e) {
+	// 	console.log("clik");
+	// 	var csha = $(this).data("sha");
+	// 	$(`#${csha}`).toggleClass("unexpanded");
+	// });
 };
 var snoopNOTOK = function(err) {
 	console.error(err);
