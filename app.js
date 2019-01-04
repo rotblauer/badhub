@@ -103,7 +103,7 @@ var formatPayload = function(eventType, data) {
 			<span style="color: ${actionColor(action)};">${action}</span>
 			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.number}) ${data.payload.pull_request.title}</a> 
 			<span style="float: right; font-size: 0.8em;"><span style="color: green;">+${data.payload.pull_request.additions}</span>/<span style="color: red;">-${data.payload.pull_request.deletions}</span>,<span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
-			<span style="color: ${actionColor(data.payload.action)};display: block; text-align: right;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
+			<span style="color: ${actionColor(data.payload.action)};display: block; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
 			`;
 			for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
 				out += (function(l) {
@@ -131,7 +131,7 @@ var formatPayload = function(eventType, data) {
 
 			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span>
 			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.pull_request.number}) ${data.payload.pull_request.title}</a> 
-			<span style="color: ${actionColor(data.payload.action)}; display: block; text-align: right;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
+			<span style="color: ${actionColor(data.payload.action)}; display: block; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
 
 			<blockquote style="color: #aaa;">
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + " [...]" : data.payload.comment.body}
