@@ -82,7 +82,17 @@ var formatPayload = function(eventType, data) {
 			}
 			break;
 		case "CreateEvent":	
-			out = `${data.payload.ref_type}: ${data.payload.ref}`;
+			out = `${data.payload.ref_type}: `
+			if (data.payload.ref_type === "branch" && data.payload.pusher_type === "user" && data.payload.master_branch !== data.payload.ref) {
+				// https://github.com/whilei/go-ethereum-2/compare/master...whilei:classic
+				out += `<a href="https://github.com/${data.repo.name}/compare/${data.payload.master_branch}...${data.actor.login}:${data.payload.ref}" target="_">${data.payload.ref}</a>`;
+			} else {
+				out += `${data.payload.ref !== null ? data.payload.ref : "🗂"}`;
+				if (data.payload.description !== "") {
+					out += `<p style="color: gray;">${data.payload.description}</p>`
+				}
+			}
+			
 			break;
 		case "ForkEvent":
 			out = `<a href="${data.payload.forkee.html_url}" target="_">${data.payload.forkee.full_name}</a>`
@@ -155,8 +165,7 @@ var formatPayload = function(eventType, data) {
 			out = `
 			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span> <a href="${data.payload.release.html_url}">${data.payload.release.tag_name}: ${data.payload.release.name}</a>
 			<blockquote>
-			<code>
-			${data.payload.release.body}
+			<code>${data.payload.release.body}
 			</code>
 			</blockquote>
 			`	
@@ -225,7 +234,7 @@ var formatEventName = function(data) {
 			n += '💬';
 			break;
 		case "ReleaseEvent":
-			n += '🔊';
+			n += '📦';
 			break;
 		case "MemberEvent":
 			n += '🚼';
@@ -234,7 +243,7 @@ var formatEventName = function(data) {
 			n += `📜`;
 			break;
 	}
-	n += " " + data.type.replace("Event", "");
+	// n += " " + data.type.replace("Event", "");
 
 	return n;
 };
@@ -267,7 +276,9 @@ function random_color( format ){
 		return rint;
 	}
 }
+// this was a try to see if color associations were visually helpful at all. maybe not so much.
 var getOrSaveNewColor = function(category, k) {
+	return "rgba(0,0,0,0)"; // abort
 	if (!colors.hasOwnProperty(category) || !colors[category].hasOwnProperty(k)) {
 		c = random_color("rgba");
 		saveNewColor(category, k, c);
@@ -332,20 +343,14 @@ var buildRow = function(d) {
 	<td style="color: #ccc;">
 		${minimalTimeDisplay(moment(d.created_at))}
 	</td>
-	<td style="min-width: 1em;">
-		<div style="display: block; height: 1em; background-color: ${getOrSaveNewColor("actor", d.actor.login)};"></div>
-	</td>
-	<td style="min-width: 1em;">
-		<div style="display: block; height: 1em; background-color: ${getOrSaveNewColor("repo", d.repo.name)};"></div>
-	</td>
-	<td >
+	<td style="">
 		<img src="${d.actor.avatar_url}" style="max-height: 1em;" />
 		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
 	</td>
-	<td style="text-align: right; padding-right: 5px;">
+	<td style="text-align: right; padding-right: 5px; border-right: 6px solid ${getOrSaveNewColor("actor", d.actor.login)};">
 		<a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
 	</td>
-	<td style="max-width: 500px; border-left: 3px solid #eee; padding: 5 5 5 10;">
+	<td style="max-width: 500px; border-left: 6px solid ${getOrSaveNewColor("repo", d.repo.name)}; padding: 5 5 5 10;">
 		<span>
 		${formatEventName(d)}
 		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length + " commits" : ""}</span>
@@ -371,8 +376,6 @@ var snoopOK = function(data) {
 						<thead>
 						<tr>
 							<th>date</th>
-							<th></th>
-							<th></th>
 							<th>entity</th>
 							<th>location</th>
 							<th>event</th>
@@ -395,7 +398,7 @@ var snoopOK = function(data) {
 					.append(
 						$(`<span></span>`)
 							.attr("id", `${d.type}`)
-							.html(formatEventName(d))
+							.html(formatEventName(d) + " " + d.type.replace("Event", ""))
 							.css({
 								"display": "block"
 							})
@@ -509,8 +512,16 @@ var setupAuthorizedListeners = function() {
 	$("#eventTypes-toggleall").on("click", function() {
 		console.log("did clic");
 		$("#eventTypes span").each(function(i) {
-			$(`.event${$(this).attr("id")}`).toggle();
+			$(`.event${$(this).attr("id")}`).toggleClass("hidden");
 			$(this).toggleClass("bold");
+		});
+		
+		eventTypesPreferHidden = [];
+		$("#eventTypes span").each(function(i) {
+			if (!$(this).hasClass("bold")) {
+				var t = $(this).attr("id");
+				storeEventTypeHiddenPref(t);
+			}
 		});
 	});
 	$("#entities-toggleall").on("click", function() {
