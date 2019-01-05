@@ -1,0 +1,9 @@
+{
+	"github-events-polling": {
+		"users/sorpaas": {
+			"token": "9af1e0441cd00d7cd610430b4ca4af95b38952b6",
+			"X-Poll-Interval": 60,
+			"ETag": "a18c3bded88eb5dbb5c849a489412bf3"
+		}
+	}
+}
