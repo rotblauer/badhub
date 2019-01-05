@@ -69,14 +69,10 @@ var formatPayload = function(eventType, data) {
 			for (var i = 0; i < cr.length; i++) {
 				out += (function(c) {
 					return `
-					<div id="${c.sha}" class="commit">
-					<!-- <small data-sha="${c.sha}" class="commit-expander" style="float:right;">&lt;/&gt;</small> -->
-					<pre style="padding: 1em 1em 0 1em; margin-bottom: 0;">
-					<code style="display: block;">${c.message}</code>
-					</pre>
-					<a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit" style="font-size: 0.8em; text-align:right; display: block;">${c.sha.substring(0,8)}&nbsp;
-					<span><i>${data.payload.ref.replace("refs/heads/", "")}</i></span></a>
-					</div>
+						<div id="${c.sha}" class="commit">
+						<code>*</code> <a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit"><code>${c.sha.substring(0,8)}</code></a>
+						<code> ${c.author.name} (${data.payload.ref.replace("refs/heads/", "")}) ${c.message}</code>
+						</div>
 					`;
 				})(cr[i]);
 			}
@@ -353,7 +349,7 @@ var buildRow = function(d) {
 	<td style="max-width: 500px; border-left: 6px solid ${getOrSaveNewColor("repo", d.repo.name)}; padding: 5 5 5 10;">
 		<span>
 		${formatEventName(d)}
-		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length + " commits" : ""}</span>
+		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length : ""}</span>
 		</span>
 	<!-- </td> -->
 
@@ -368,7 +364,15 @@ var buildRow = function(d) {
 	`);
 }
 
-var snoopOK = function(data) {
+var snoopOK = function(data, textStatus, request) {
+	// var eTag, xPollInterval;
+	// if (+request.status === 200 || +request.status === 304) {
+	// 	xPollInterval = +request.getResponseHeader("X-Poll-Interval");
+	// }
+	// if (+request.status === 200) {
+	// 	eTag = request.getResponseHeader("ETag")
+	// }
+
 	if ($("#response").children().length === 0) {
 		$("#response").append(
 				$(`
@@ -447,6 +451,17 @@ var snoopNOTOK = function(err) {
 	$(".instructions").show();
 }
 
+var queryEntity = function(q) {
+	$.ajax({
+		url: `https://api.github.com/${q.resource}/events?access_token=${q.apikey}&page=${q.page}`,
+		dataType: 'json',
+		type: "GET",
+		contentType: 'application/json',
+		success: snoopOK,
+		error: snoopNOTOK,
+	});
+};
+
 var doSnoop = function(query) {
 	$("#response").empty();
 	$("#entities").empty();
@@ -463,16 +478,7 @@ var doSnoop = function(query) {
 	}
 	for (var i = 0; i < qs.length; i++) {
 		for (var page = 1; page <= pageLimit; page++) {
-			(function(q) {
-				$.ajax({
-					url: `https://api.github.com/${q}/events?access_token=${apikey}&page=${page}`,
-					dataType: 'json',
-					type: "GET",
-					contentType: 'application/json',
-					success: snoopOK,
-					error: snoopNOTOK,
-				});
-			})(qs[i])
+			(queryEntity)({resource: qs[i], page: page, apikey: apikey})
 		}
 	}
 };

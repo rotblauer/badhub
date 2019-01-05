@@ -1,0 +1,63 @@
+{
+	"defaultScope": {
+		"since": 604800,
+		"eventsCeiling": 30
+	},
+	"profiles": [{
+		"name": "work team",
+		"token": "9af1e0441cd00d7cd610430b4ca4af95b38952b6",
+		"defaultScope": {
+			"since": 259200,
+			"eventsCeiling": 60
+		},
+		"entities": [
+			{
+				"id": "users/sorpaas",
+				// use larger limit of the two
+				"since": 604800, // 60*60*24*7 = one week in seconds 
+				// but never exceed this number of events
+				"eventsCeiling": 90
+			},
+			{
+				"id": "users/mersinvald"
+			},
+			{
+				"id": "users/tzdybal"
+			}
+		],
+		"preferences": {
+			"hiddenEventTypes": [
+				"WatchEvent"
+			],
+			"hiddenEntities": [
+				"Dexaran"
+			]
+		}
+	}, {
+		"name": "work orgs and repos",
+		"token": "4bc1a0441cd00d7ce610430b4cac9f91b98d32f4",
+		"entities": [
+			{
+				"id": "orgs/ethereumclassic",
+				"since": 604800
+			},
+			{
+				"id": "orgs/etc-labs"
+			},
+			{
+				"id": "networks/ethoxy/multi-geth"
+			}
+		]
+	},
+	{
+		"name": "weekends",
+		"token": "9af1e0441cd00d7cd610430b4ca4af95b38952b6",
+		"entities": [
+			{
+				"id": "orgs/rotblauer"
+			}
+		]
+	}]
+}
+
+// users/whilei,users/sorpaas,users/mersinvald,users/tzdybal,users/shanejonas,users/belfordz,users/r8d8,users/jakelang,users/jlanej,users/meowsbits,orgs/ethereumclassic
