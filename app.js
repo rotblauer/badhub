@@ -242,6 +242,51 @@ var formatEventName = function(data) {
 var times = [];
 var eventIDs = [];
 var eventTypesPreferHidden = [];
+var colors = {
+	"actor": {
+		"whilei": "rgba(255,0,0,0.2)"
+	},
+	"repo": {
+		"ethereumclassic/go-ethereum": "rgba(0,255,0,0.2)"
+	}
+};
+
+// https://stackoverflow.com/a/1484507/4401322
+function random_color( format ){
+	var rint = Math.floor( 0x100000000 * Math.random());
+	switch( format ){
+	  case 'hex':
+		return '#' + ('00000'   + rint.toString(16)).slice(-6).toUpperCase();
+	  case 'hexa':
+		return '#' + ('0000000' + rint.toString(16)).slice(-8).toUpperCase();
+	  case 'rgb':
+		return 'rgb('  + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ')';
+	  case 'rgba':
+		return 'rgba(' + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ', 0.1)'; //  + (rint >> 24 & 255)/255 + ')'
+	  default:
+		return rint;
+	}
+}
+var getOrSaveNewColor = function(category, k) {
+	if (!colors.hasOwnProperty(category) || !colors[category].hasOwnProperty(k)) {
+		c = random_color("rgba");
+		saveNewColor(category, k, c);
+		return c;
+	}
+	return colors[category][k];
+}
+var saveNewColor = function(category, k, v) {
+	colors[category] = colors[category] || {};
+	colors[category][k] = v;
+	localStorage.setItem("badhub-colors", JSON.stringify(colors));
+}
+var loadColors = function() {
+	var l = localStorage.getItem("badhub-colors");
+	if (l === null || l === "") {
+		return;
+	}
+	colors = JSON.parse(l);
+};
 
 var eventTypeIsPreferredHidden = function(eventType) {
 	return eventTypesPreferHidden.indexOf(eventType) > -1;
@@ -287,12 +332,18 @@ var buildRow = function(d) {
 	<td style="color: #ccc;">
 		${minimalTimeDisplay(moment(d.created_at))}
 	</td>
-	<td>
+	<td style="min-width: 1em;">
+		<div style="display: block; height: 1em; background-color: ${getOrSaveNewColor("actor", d.actor.login)};"></div>
+	</td>
+	<td style="min-width: 1em;">
+		<div style="display: block; height: 1em; background-color: ${getOrSaveNewColor("repo", d.repo.name)};"></div>
+	</td>
+	<td >
 		<img src="${d.actor.avatar_url}" style="max-height: 1em;" />
 		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
 	</td>
 	<td style="text-align: right; padding-right: 5px;">
-		<a href="https://github.com/${d.repo.name}" target="_">${d.repo.name}</a>
+		<a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
 	</td>
 	<td style="max-width: 500px; border-left: 3px solid #eee; padding: 5 5 5 10;">
 		<span>
@@ -320,6 +371,8 @@ var snoopOK = function(data) {
 						<thead>
 						<tr>
 							<th>date</th>
+							<th></th>
+							<th></th>
 							<th>entity</th>
 							<th>location</th>
 							<th>event</th>
