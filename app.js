@@ -436,6 +436,8 @@ var snoopOK = function(data, textStatus, request) {
 				return;
 			}
 			eventIDs.push(d.id);
+			addEventTypeUserData(d);
+			addEventTypeRepoData(d);
 			var j = insertTimesYieldsI(d.created_at);
 			var row = buildRow(d);
 			if (j === 0) {
@@ -540,6 +542,9 @@ var setupAuthorizedListeners = function() {
 	$("#toggle-darktheme").on("click", function(e) {
 		handleTheme(!$("body").hasClass("darktheme"));
 	});
+	$("#toggle-charts").on("click", function(e) {
+		$(".chart-holder").toggleClass("hidden");
+	});
 };
 
 var authorized = function() {
@@ -549,6 +554,7 @@ var authorized = function() {
 	$("#input-query").val(existingQ);
 	setupAuthorizedListeners();
 	loadEventTypePrefs();
+	setupCharts();
 	if (existingQ !== "" && existingQ !== null) {
 		doSnoop(existingQ);
 	}
@@ -565,17 +571,4 @@ $(function () {
 		apikey = getKey;
 		authorized();
 	}
-
-
-	// var pathname = window.location.hash;
-	// $(".this-location").text(window.location.host);
-	// var hosts = pathname.substring(1).split(",");
-	// for (var i = 0; i < hosts.length; i++) {
-	// 	(function(h) {
-	// 		console.log(h);
-	// 		dataLoop(h);
-	// 		setInterval(function() {
-	// 			dataLoop(h);
-	// 		}, refereshInterval);
-	// 	})(hosts[i]);
 });

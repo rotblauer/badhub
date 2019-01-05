@@ -1,67 +1,119 @@
 var randomScalingFactor = function () {
 	return Math.round(Math.random() * 100);
 };
-var chartColors = window.chartColors;
+
 var color = Chart.helpers.color;
 var config = {
+	type: 'radar',
 	data: {
+		labels: [
+			['Eating', 'Dinner'],
+			['Drinking', 'Water'], 'Sleeping', ['Designing', 'Graphics'], 'Coding', 'Cycling', 'Running'
+		],
 		datasets: [{
-			data: [randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), randomScalingFactor(), ],
-			backgroundColor: [color(chartColors.red).alpha(0.5).rgbString(), color(chartColors.orange).alpha(0.5).rgbString(), color(chartColors.yellow).alpha(0.5).rgbString(), color(chartColors.green).alpha(0.5).rgbString(), color(chartColors.blue).alpha(0.5).rgbString(), ],
-			label: 'My dataset' // for legend 
-		}],
-		labels: ['Red', 'Orange', 'Yellow', 'Green', 'Blue']
+			label: 'My First dataset',
+			backgroundColor: color(window.chartColors.red).alpha(0.2).rgbString(),
+			borderColor: window.chartColors.red,
+			pointBackgroundColor: window.chartColors.red,
+			data: [
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor()
+			]
+		}, {
+			label: 'My Second dataset',
+			backgroundColor: color(window.chartColors.blue).alpha(0.2).rgbString(),
+			borderColor: window.chartColors.blue,
+			pointBackgroundColor: window.chartColors.blue,
+			data: [
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor(),
+				randomScalingFactor()
+			]
+		}]
 	},
 	options: {
-		responsive: true,
 		legend: {
-			position: 'right',
+			position: 'top',
 		},
 		title: {
 			display: true,
-			text: 'Chart.js Polar Area Chart'
+			text: 'Chart.js Radar Chart'
 		},
 		scale: {
 			ticks: {
 				beginAtZero: true
-			},
-			reverse: false
-		},
-		animation: {
-			animateRotate: false,
-			animateScale: true
+			}
 		}
 	}
 };
+
 window.onload = function () {
-	var ctx = document.getElementById('chart-area');
-	window.myPolarArea = Chart.PolarArea(ctx, config);
+	window.myRadar = new Chart(document.getElementById('chart-eventType-user'), config);
 };
+
 document.getElementById('randomizeData').addEventListener('click', function () {
-	config.data.datasets.forEach(function (piece, i) {
-		piece.data.forEach(function (value, j) {
-			config.data.datasets[i].data[j] = randomScalingFactor();
+	config.data.datasets.forEach(function (dataset) {
+		dataset.data = dataset.data.map(function () {
+			return randomScalingFactor();
 		});
 	});
-	window.myPolarArea.update();
+
+	window.myRadar.update();
 });
+
 var colorNames = Object.keys(window.chartColors);
+document.getElementById('addDataset').addEventListener('click', function () {
+	var colorName = colorNames[config.data.datasets.length % colorNames.length];
+	var newColor = window.chartColors[colorName];
+
+	var newDataset = {
+		label: 'Dataset ' + config.data.datasets.length,
+		borderColor: newColor,
+		backgroundColor: color(newColor).alpha(0.2).rgbString(),
+		pointBorderColor: newColor,
+		data: [],
+	};
+
+	for (var index = 0; index < config.data.labels.length; ++index) {
+		newDataset.data.push(randomScalingFactor());
+	}
+
+	config.data.datasets.push(newDataset);
+	window.myRadar.update();
+});
+
 document.getElementById('addData').addEventListener('click', function () {
 	if (config.data.datasets.length > 0) {
-		config.data.labels.push('data #' + config.data.labels.length);
+		config.data.labels.push('dataset #' + config.data.labels.length);
+
 		config.data.datasets.forEach(function (dataset) {
-			var colorName = colorNames[config.data.labels.length % colorNames.length];
-			dataset.backgroundColor.push(window.chartColors[colorName]);
 			dataset.data.push(randomScalingFactor());
 		});
-		window.myPolarArea.update();
+
+		window.myRadar.update();
 	}
 });
+
+document.getElementById('removeDataset').addEventListener('click', function () {
+	config.data.datasets.splice(0, 1);
+	window.myRadar.update();
+});
+
 document.getElementById('removeData').addEventListener('click', function () {
-	config.data.labels.pop(); // remove the label first 
+	config.data.labels.pop(); // remove the label first
+
 	config.data.datasets.forEach(function (dataset) {
-		dataset.backgroundColor.pop();
 		dataset.data.pop();
 	});
-	window.myPolarArea.update();
+
+	window.myRadar.update();
 });

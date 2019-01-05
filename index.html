@@ -26,7 +26,7 @@
 				overflow: normal;
 			}
 			.hidden {
-				display: none;
+				display: none !important;
 			}
 			body.darktheme {
 				background-color: #321;
@@ -44,7 +44,9 @@
 			<input type="text" id="input-query" style="width: 90vw;">
 			<button id="input-enter-query">snoop</button>
 			<p>
-				<span id="showdetails"><i>show details</i></span>&nbsp;|&nbsp;<span id="toggle-darktheme"><i>toggle dark theme</i></span>
+				<span id="showdetails"><i>show details</i></span>&nbsp;
+				|&nbsp;<span id="toggle-darktheme"><i>toggle dark theme</i></span>
+				|&nbsp;<span id="toggle-charts"><i>toggle charts</i></span>
 			</p>
 			
 
@@ -62,9 +64,13 @@
 				<div id="entities" style="" ></div>
 			</div>
 
-			<div id="charts">
-				<div id="eventType-user" class="chart"></div>
+			<div id="charts-holder-1" class="chart-holder hidden" style="display: inline-block;position: relative; width: 80vw;">
+				<canvas id="chart-eventType-user" class="chart" ></canvas>
 			</div>
+			<div id="charts-holder-2" class="chart-holder hidden" style="display: inline-block; position: relative; width: 80vw;">
+				<canvas id="chart-eventType-repo" class="chart" ></canvas>
+			</div>
+
 			
 
 			<div id="response"></div>
@@ -84,7 +90,9 @@
 			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 			  crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
 		<script src="moment.min.js"></script>
+		<script src="mycharts.js"></script>
 		<script src="app.js"></script>
 	</body>
 </html>
