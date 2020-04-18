@@ -85,7 +85,7 @@ var getExistingOrRandomColor = function (entityType, entity) {
     if (set) {
         return set;
     }
-    var n = "#" + entity.toHexColour();
+    var n = "#" + (entityType+entity).toHexColour();
     // var n = random_color("hex");
     assignedColors[entityType][entity] = n;
     return n;

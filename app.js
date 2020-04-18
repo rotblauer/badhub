@@ -110,14 +110,16 @@ var formatPayload = function (eventType, data) {
 			out = `
 			<span style="color: ${actionColor(action)};">${action}</span>
 			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.number}) ${data.payload.pull_request.title}</a> 
-			<span style="float: right; font-size: 0.8em;"><span style="color: green;">+${data.payload.pull_request.additions}</span>/<span style="color: red;">-${data.payload.pull_request.deletions}</span>,<span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
-			<span style="color: ${actionColor(action)};display: block; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
+			<span style="font-size: 0.8em;"><span style="color: green;">+${data.payload.pull_request.additions}</span>/<span style="color: red;">-${data.payload.pull_request.deletions}</span>,<span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
+			<p>
+			<span style="color: ${actionColor(action)}; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
 			`;
 			for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
 				out += (function (l) {
-					return `<small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small>`;
+					return `<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
 				})(data.payload.pull_request.labels[j]);
 			}
+			out += `</p>`
 			break;
 		case "IssueCommentEvent":
 			out = `
@@ -342,20 +344,20 @@ var buildRow = function (d) {
 	<td>
 		<img src="${d.actor.avatar_url}" style="max-height: 2em;" />
 	</td>
-	<td style="min-width: 200px;">
+	<td style="min-width: 100px;">
 		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
 	</td>
-	<td style="text-align: right; padding-right: 5px; border-right: 6px solid ${getOrSaveNewColor("actor", d.actor.login)};">
+	<td style="min-width: 300px; text-align: right; padding-right: 5px; border-right: 6px solid ${getOrSaveNewColor("actor", d.actor.login)};">
 		<a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
 	</td>
-	<td style="max-width: 500px; border-left: 6px solid ${getOrSaveNewColor("repo", d.repo.name)}; padding: 5 5 5 10;">
+	<td style="min-width: 2em; border-left: 6px solid ${getOrSaveNewColor("repo", d.repo.name)}; padding: 5 5 5 10;">
 		<span>
 		${formatEventName(d)}
-		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length : ""}</span>
+		<span style="color: #bbb"><sup>${d.type === "PushEvent" ? d.payload.commits.length : ""}</sup></span>
 		</span>
 	</td> 
 
-	<td> 
+	<td class="apayload"> 
 		${formatPayload(d.type, d)}
 	</td>
 
@@ -430,6 +432,8 @@ var snoopOK = function (data, textStatus, request) {
 				`)
 		);
 	}
+
+	// localStorage.setItem("data", JSON.stringify(data));
 	for (var i = 0; i < data.length; i++) {
 		(function (d) {
 
@@ -489,7 +493,6 @@ var snoopOK = function (data, textStatus, request) {
 			}
 			eventIDs.push(d.id);
 
-			// localStorage.setItem(d.id+"", JSON.stringify(d));
 
 			addEventTypeUserData(d);
 			addEventTypeRepoData(d);
@@ -643,9 +646,9 @@ var valueOk = function (val) {
 }
 
 var reverseString = function (str) {
-	var splitString = str.split("");
+	var splitString = str.slice(1).split("");
 	var reverseArray = splitString.reverse();
-	return reverseArray.join("");
+	return str.slice(0,1) + reverseArray.join("");
 };
 
 $(function () {
