@@ -1,98 +1,96 @@
 <html>
-	<head>
-		<meta charset="UTF-8"> 
-	</head>
-	<body class="">
-		<style>
-			.details {
-				display: none;
-			}
-			table tbody tr {
-				margin-bottom: 12px;
-			}
-			.bold {
-				font-weight: bold;
-			}
-			td {
-				vertical-align: baseline;
-			}
-			pre {
-				display: block;
-				background-color: rgba(240,240,240,0.5);
-			}
 
-			code {
-				white-space: pre-wrap;
-				overflow: normal;
-			}
-			.hidden {
-				display: none !important;
-			}
-			body.darktheme {
-				background-color: #270000;
-				color: white;
-			}
-			body.darktheme a {
-				color: lightblue;
-			}
-			body.darktheme a.commit {
-				color: #eee;
-			}
-		</style>
-		<div id="main" style="display: none;">
-			<small class="instructions" style="color:green;"><strong>example:</strong> <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
-			<input type="text" id="input-query" style="width: 90vw;">
-			<button id="input-enter-query">snoop</button>
-			<p>
-				<span id="showdetails"><i>show details</i></span>&nbsp;
-				|&nbsp;<span id="toggle-darktheme"><i>toggle dark theme</i></span>
-				|&nbsp;<span id="toggle-charts"><i>toggle charts</i></span>
-			</p>
-			
+<head>
+    <meta charset="UTF-8">
+</head>
 
-			<div style="position: fixed; top: 50; right: 0; height: 80vh; overflow-y: scroll; ">
-				<a id="eventTypes-toggleall"><i>toggle all events</i></a>
-				<br>
-				<br>
-				toggle events:
-				<div id="eventTypes"></div>	
-				<hr>
-				<a id="entities-toggleall"><i>toggle all entities</i></a>
-				<br>
-				<br>
-				toggle entities:
-				<div id="entities" style="" ></div>
-			</div>
+<body class="">
+    <style>
+            .details {
+            display: none;
+        }
+        
+        table tbody tr {
+            margin-bottom: 12px;
+        }
+        
+        .bold {
+            font-weight: bold;
+            td {
+                vertical-align: baseline;
+            }
+            pre {
+                display: block;
+                background-color: rgba(240, 240, 240, 0.5);
+            }
+            code {
+                white-space: pre-wrap;
+                overflow: normal;
+            }
+            .hidden {
+                display: none !important;
+            }
+            body.darktheme {
+                background-color: #270000;
+                color: white;
+            }
+            body.darktheme a {
+                color: lightblue;
+            }
+            body.darktheme a.commit {
+                color: #eee;
+            }
+    </style>
+    <div id="main" style="display: none;">
+        <small class="instructions" style="color:green;"><strong>example:</strong> <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
+        <input type="text" id="input-query" style="width: 90vw;">
+        <button id="input-enter-query">snoop</button>
+        <p>
+            <span id="showdetails"><i>show details</i></span>&nbsp; |&nbsp;
+            <span id="toggle-darktheme"><i>toggle dark theme</i></span> |&nbsp;
+            <span id="toggle-charts"><i>toggle charts</i></span>
+        </p>
 
-			<div id="charts-holder-1" class="chart-holder hidden" style="display: inline-block;position: relative; width: 80vw;">
-				<canvas id="chart-eventType-user" class="chart" ></canvas>
-			</div>
-			<div id="charts-holder-2" class="chart-holder hidden" style="display: inline-block; position: relative; width: 80vw;">
-				<canvas id="chart-eventType-repo" class="chart" ></canvas>
-			</div>
 
-			
+        <div style="position: fixed; top: 50; right: 0; height: 80vh; overflow-y: scroll; ">
+            <a id="eventTypes-toggleall"><i>toggle all events</i></a>
+            <br>
+            <br> toggle events:
+            <div id="eventTypes"></div>
+            <hr>
+            <a id="entities-toggleall"><i>toggle all entities</i></a>
+            <br>
+            <br> toggle entities:
+            <div id="entities" style=""></div>
+        </div>
 
-			<div id="response"></div>
-		</div>
+        <div id="charts-holder-1" class="chart-holder hidden" style="display: inline-block;position: relative; width: 80vw;">
+            <canvas id="chart-eventType-user" class="chart"></canvas>
+        </div>
+        <div id="charts-holder-2" class="chart-holder hidden" style="display: inline-block; position: relative; width: 80vw;">
+            <canvas id="chart-eventType-repo" class="chart"></canvas>
+        </div>
 
-		<div id="login">
-			<h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/" target="_">a github api token</a></h1>
-			<blockquote>this will only be stored in <code>localStorage</code></blockquote>
-			<p class="error" style="display: none;">you have to have one</p>
-			<input id="input-apikey" type="text">
-			<button id="input-enter-apikey">enter</button>
-		</div>
 
-		<!-- scripts -->
-		<script
-			  src="https://code.jquery.com/jquery-3.3.1.min.js"
-			  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-			  crossorigin="anonymous"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-		<script src="moment.min.js"></script>
-		<script src="mycharts.js"></script>
-		<script src="app.js"></script>
-	</body>
+
+        <div id="response"></div>
+    </div>
+
+    <div id="login">
+        <h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/" target="_">a github api token</a></h1>
+        <blockquote>this will only be stored in <code>localStorage</code></blockquote>
+        <p class="error" style="display: none;">you have to have one</p>
+        <input id="input-apikey" type="text">
+        <button id="input-enter-apikey">enter</button>
+    </div>
+
+    <!-- scripts -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+    <script src="moment.min.js"></script>
+    <script src="mycharts.js"></script>
+    <script src="app.js"></script>
+</body>
+
 </html>
