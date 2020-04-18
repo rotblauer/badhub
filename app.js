@@ -394,7 +394,7 @@ var isAutomatedPushEvent = function(da) {
 	}
 	for (var i = 0; i < da["payload"]["commits"].length; i++) {
 		var c = da["payload"]["commits"][i];
-		if (c.author.name === "crawler" || /[\W]*ci\W/igm.test(c.message)) {
+		if (c.author.name === "crawler" || /[\W]*ci\W/igm.test(c.message) || /dependabot/igm.test(c.author.name)) {
 			return true;
 		}
 		// if (/[\W]*ci\W/igm.test(c.message)) {
