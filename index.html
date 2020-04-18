@@ -10,8 +10,15 @@
             display: none;
         }
         
+        table {
+            background-color: #f6f8fa;
+        }
         table tbody tr {
             margin-bottom: 12px;
+            vertical-align: top;
+        }
+        td {
+            overflow-wrap: break-word;
         }
         
         .bold {
@@ -66,6 +73,9 @@
 
         <div id="charts-holder-1" class="chart-holder hidden" style="display: inline-block;position: relative; width: 80vw;">
             <canvas id="chart-eventType-user" class="chart"></canvas>
+        </div>
+        <div id="charts-holder-3" class="chart-holder hidden" style="display: inline-block;position: relative; width: 80vw;">
+            <canvas id="chart-user-eventType" class="chart"></canvas>
         </div>
         <div id="charts-holder-2" class="chart-holder hidden" style="display: inline-block; position: relative; width: 80vw;">
             <canvas id="chart-eventType-repo" class="chart"></canvas>

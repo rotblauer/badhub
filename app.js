@@ -1,7 +1,7 @@
 var apikey = "";
-var pageLimit = 2; // 30 events per page // TODO FIXME add a user-configurable feature here
+var pageLimit = 8; // 30 events per page // TODO FIXME add a user-configurable feature here
 
-var actionColor = function(action) {
+var actionColor = function (action) {
 	switch (action) {
 		case "created":
 			return "green";
@@ -22,62 +22,62 @@ var actionColor = function(action) {
 }
 
 // accepts _moment()_ time
-var minimalTimeDisplay = function(time) {
-    return time.fromNow(true).replace("a few seconds", "0m").replace("a ", "1").replace("an", "1").replace("hours", "h").replace("hour", "h").replace("minutes", "m").replace("minute", "m").replace(" ","").replace("days","d").replace("day", "d").replace("months", "M").replace("month", "M");
+var minimalTimeDisplay = function (time) {
+	return time.fromNow(true).replace("a few seconds", "0m").replace("a ", "1").replace("an", "1").replace("hours", "h").replace("hour", "h").replace("minutes", "m").replace("minute", "m").replace(" ", "").replace("days", "d").replace("day", "d").replace("months", "M").replace("month", "M");
 }
 
 // https://stackoverflow.com/a/35970186/4401322
 function padZero(str, len) {
-    len = len || 2;
-    var zeros = new Array(len).join('0');
-    return (zeros + str).slice(-len);
+	len = len || 2;
+	var zeros = new Array(len).join('0');
+	return (zeros + str).slice(-len);
 }
 
 function invertColor(hex, bw) {
-    if (hex.indexOf('#') === 0) {
-        hex = hex.slice(1);
-    }
-    // convert 3-digit hex to 6-digits.
-    if (hex.length === 3) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-    if (hex.length !== 6) {
-        throw new Error('Invalid HEX color.');
-    }
-    var r = parseInt(hex.slice(0, 2), 16),
-        g = parseInt(hex.slice(2, 4), 16),
-        b = parseInt(hex.slice(4, 6), 16);
-    if (bw) {
-        // http://stackoverflow.com/a/3943023/112731
-        return (r * 0.299 + g * 0.587 + b * 0.114) > 186
-            ? '#000000'
-            : '#FFFFFF';
-    }
-    // invert color components
-    r = (255 - r).toString(16);
-    g = (255 - g).toString(16);
-    b = (255 - b).toString(16);
-    // pad each with zeros and return
-    return "#" + padZero(r) + padZero(g) + padZero(b);
+	if (hex.indexOf('#') === 0) {
+		hex = hex.slice(1);
+	}
+	// convert 3-digit hex to 6-digits.
+	if (hex.length === 3) {
+		hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+	}
+	if (hex.length !== 6) {
+		throw new Error('Invalid HEX color.');
+	}
+	var r = parseInt(hex.slice(0, 2), 16),
+		g = parseInt(hex.slice(2, 4), 16),
+		b = parseInt(hex.slice(4, 6), 16);
+	if (bw) {
+		// http://stackoverflow.com/a/3943023/112731
+		return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+			? '#000000'
+			: '#FFFFFF';
+	}
+	// invert color components
+	r = (255 - r).toString(16);
+	g = (255 - g).toString(16);
+	b = (255 - b).toString(16);
+	// pad each with zeros and return
+	return "#" + padZero(r) + padZero(g) + padZero(b);
 }
 
-var formatPayload = function(eventType, data) {
+var formatPayload = function (eventType, data) {
 	var out = "";
 	switch (eventType) {
 		case "PushEvent":
 			var cr = data.payload.commits.reverse();
 			for (var i = 0; i < cr.length; i++) {
-				out += (function(c) {
+				out += (function (c) {
 					return `
 						<div id="${c.sha}" class="commit">
-						<code>*</code> <a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit"><code>${c.sha.substring(0,8)}</code></a>
+						<code>*</code> <a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit"><code>${c.sha.substring(0, 8)}</code></a>
 						<code> ${c.author.name} (${data.payload.ref.replace("refs/heads/", "")}) ${c.message}</code>
 						</div>
 					`;
 				})(cr[i]);
 			}
 			break;
-		case "CreateEvent":	
+		case "CreateEvent":
 			out = `${data.payload.ref_type}: `
 			if (data.payload.ref_type === "branch" && data.payload.pusher_type === "user" && data.payload.master_branch !== data.payload.ref) {
 				// https://github.com/whilei/go-ethereum-2/compare/master...whilei:classic
@@ -88,7 +88,7 @@ var formatPayload = function(eventType, data) {
 					out += `<p style="color: gray;">${data.payload.description}</p>`
 				}
 			}
-			
+
 			break;
 		case "ForkEvent":
 			out = `<a href="${data.payload.forkee.html_url}" target="_">${data.payload.forkee.full_name}</a>`
@@ -114,7 +114,7 @@ var formatPayload = function(eventType, data) {
 			<span style="color: ${actionColor(action)};display: block; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
 			`;
 			for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
-				out += (function(l) {
+				out += (function (l) {
 					return `<small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small>`;
 				})(data.payload.pull_request.labels[j]);
 			}
@@ -155,7 +155,7 @@ var formatPayload = function(eventType, data) {
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + "[...]" : data.payload.comment.body}
 			</blockquote>
 
-			`	
+			`
 			break;
 		case "ReleaseEvent":
 			out = `
@@ -164,7 +164,7 @@ var formatPayload = function(eventType, data) {
 			<code>${data.payload.release.body}
 			</code>
 			</blockquote>
-			`	
+			`
 			break;
 		case "MemberEvent":
 			out = `
@@ -173,10 +173,10 @@ var formatPayload = function(eventType, data) {
 			`
 			break;
 		case "GollumEvent":
-		// wiki. weird name for an event.
+			// wiki. weird name for an event.
 			var cr = data.payload.pages.reverse();
 			for (var i = 0; i < cr.length; i++) {
-				out += (function(c) {
+				out += (function (c) {
 					return `
 					<span style="color: ${actionColor(c.action)}">${c.action}</span>
 					<a href="${c.html_url}" target="_">${c.page_name}</a>
@@ -192,8 +192,8 @@ var formatPayload = function(eventType, data) {
 	return out;
 }
 
-var formatEventName = function(data) {
-	var n = "" ; 
+var formatEventName = function (data) {
+	var n = "";
 	var eventName = data.type;
 	switch (eventName) {
 		case "PushEvent":
@@ -257,23 +257,23 @@ var colors = {
 };
 
 // https://stackoverflow.com/a/1484507/4401322
-function random_color( format ){
-	var rint = Math.floor( 0x100000000 * Math.random());
-	switch( format ){
-	  case 'hex':
-		return '#' + ('00000'   + rint.toString(16)).slice(-6).toUpperCase();
-	  case 'hexa':
-		return '#' + ('0000000' + rint.toString(16)).slice(-8).toUpperCase();
-	  case 'rgb':
-		return 'rgb('  + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ')';
-	  case 'rgba':
-		return 'rgba(' + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ', 0.1)'; //  + (rint >> 24 & 255)/255 + ')'
-	  default:
-		return rint;
+function random_color(format) {
+	var rint = Math.floor(0x100000000 * Math.random());
+	switch (format) {
+		case 'hex':
+			return '#' + ('00000' + rint.toString(16)).slice(-6).toUpperCase();
+		case 'hexa':
+			return '#' + ('0000000' + rint.toString(16)).slice(-8).toUpperCase();
+		case 'rgb':
+			return 'rgb(' + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ')';
+		case 'rgba':
+			return 'rgba(' + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ', 0.1)'; //  + (rint >> 24 & 255)/255 + ')'
+		default:
+			return rint;
 	}
 }
 // this was a try to see if color associations were visually helpful at all. maybe not so much.
-var getOrSaveNewColor = function(category, k) {
+var getOrSaveNewColor = function (category, k) {
 	return "rgba(0,0,0,0)"; // abort
 	if (!colors.hasOwnProperty(category) || !colors[category].hasOwnProperty(k)) {
 		c = random_color("rgba");
@@ -282,12 +282,12 @@ var getOrSaveNewColor = function(category, k) {
 	}
 	return colors[category][k];
 }
-var saveNewColor = function(category, k, v) {
+var saveNewColor = function (category, k, v) {
 	colors[category] = colors[category] || {};
 	colors[category][k] = v;
 	localStorage.setItem("badhub-colors", JSON.stringify(colors));
 }
-var loadColors = function() {
+var loadColors = function () {
 	var l = localStorage.getItem("badhub-colors");
 	if (l === null || l === "") {
 		return;
@@ -295,17 +295,17 @@ var loadColors = function() {
 	colors = JSON.parse(l);
 };
 
-var eventTypeIsPreferredHidden = function(eventType) {
+var eventTypeIsPreferredHidden = function (eventType) {
 	return eventTypesPreferHidden.indexOf(eventType) > -1;
 };
-var loadEventTypePrefs = function() {
+var loadEventTypePrefs = function () {
 	var l = localStorage.getItem("badhub-eventtypeshidden");
 	if (l === null || l === "") {
 		return;
 	}
 	eventTypesPreferHidden = JSON.parse(l);
 };
-var storeEventTypeHiddenPref = function(eventType) {
+var storeEventTypeHiddenPref = function (eventType) {
 	var i = eventTypesPreferHidden.indexOf(eventType);
 	if (i > -1) {
 		eventTypesPreferHidden.splice(i, 1);
@@ -315,7 +315,7 @@ var storeEventTypeHiddenPref = function(eventType) {
 	localStorage.setItem("badhub-eventtypeshidden", JSON.stringify(eventTypesPreferHidden));
 };
 
-var insertTimesYieldsI = function(t) {
+var insertTimesYieldsI = function (t) {
 	var didInsert = 0;
 	if (times.length === 0) {
 		times.push(t);
@@ -330,17 +330,19 @@ var insertTimesYieldsI = function(t) {
 		}
 	}
 	times.push(t);
-	return times.length -1;
+	return times.length - 1;
 };
 
-var buildRow = function(d) {
+var buildRow = function (d) {
 	return $(`
 	<tr class="event${d.type} entity${d.actor.login} ${eventTypeIsPreferredHidden(d.type) ? 'hidden' : ''}">
 	<td style="color: #ccc;">
 		${minimalTimeDisplay(moment(d.created_at))}
 	</td>
-	<td style="">
-		<img src="${d.actor.avatar_url}" style="max-height: 1em;" />
+	<td>
+		<img src="${d.actor.avatar_url}" style="max-height: 2em;" />
+	</td>
+	<td style="min-width: 200px;">
 		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
 	</td>
 	<td style="text-align: right; padding-right: 5px; border-right: 6px solid ${getOrSaveNewColor("actor", d.actor.login)};">
@@ -351,9 +353,9 @@ var buildRow = function(d) {
 		${formatEventName(d)}
 		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length : ""}</span>
 		</span>
-	<!-- </td> -->
+	</td> 
 
-	<!-- <td> -->
+	<td> 
 		${formatPayload(d.type, d)}
 	</td>
 
@@ -364,7 +366,40 @@ var buildRow = function(d) {
 	`);
 }
 
-var snoopOK = function(data, textStatus, request) {
+function convertMS(milliseconds) {
+	var day, hour, minute, seconds;
+	seconds = Math.floor(milliseconds / 1000);
+	minute = Math.floor(seconds / 60);
+	seconds = seconds % 60;
+	hour = Math.floor(minute / 60);
+	minute = minute % 60;
+	day = Math.floor(hour / 24);
+	hour = hour % 24;
+	return {
+		day: day,
+		hour: hour,
+		minute: minute,
+		seconds: seconds
+	};
+}
+
+var isAutomatedPushEvent = function(da) {
+	if (da["type"] !== "PushEvent") {
+		return false;
+	}
+	for (var i = 0; i < da["payload"]["commits"].length; i++) {
+		var c = da["payload"]["commits"][i];
+		if (c.author.name === "crawler" || /[\W]*ci\W/igm.test(c.message)) {
+			return true;
+		}
+		// if (/[\W]*ci\W/igm.test(c.message)) {
+		// 	return true;
+		// }
+	} 
+	return false;
+};
+
+var snoopOK = function (data, textStatus, request) {
 	// var eTag, xPollInterval;
 	// if (+request.status === 200 || +request.status === 304) {
 	// 	xPollInterval = +request.getResponseHeader("X-Poll-Interval");
@@ -375,13 +410,15 @@ var snoopOK = function(data, textStatus, request) {
 
 	if ($("#response").children().length === 0) {
 		$("#response").append(
-				$(`
+			$(`
 					<table>
 						<thead>
 						<tr>
 							<th>date</th>
+							<th></th>
 							<th>entity</th>
 							<th>location</th>
+							<th></th>
 							<th>event</th>
 							<!-- <th>info</th> -->
 							<th class="details">payload</th>
@@ -394,7 +431,22 @@ var snoopOK = function(data, textStatus, request) {
 		);
 	}
 	for (var i = 0; i < data.length; i++) {
-		(function(d) {
+		(function (d) {
+
+			// filter by date, leaving out old events
+			// othewise all users will have same number of events since the getter is
+			// governed by the pager
+			var createdAt = Date.parse(d.created_at);
+			var age = Date.now() - createdAt;
+			if (convertMS(age).day > 8) {
+				return;
+			}
+
+			if (isAutomatedPushEvent(d)) {
+				return;
+			}
+
+
 			// add uniq event type for filtering
 			var preferredHidden = eventTypeIsPreferredHidden(d.type);
 			if ($(`#eventTypes #${d.type}`).length === 0) {
@@ -408,7 +460,7 @@ var snoopOK = function(data, textStatus, request) {
 							})
 							// .addClass("bold")
 							.addClass(`${preferredHidden ? "" : "bold"}`)
-							.on("click", function(e) {
+							.on("click", function (e) {
 								$(`.event${d.type}`).toggleClass("hidden");
 								storeEventTypeHiddenPref(d.type);
 								$(this).toggleClass("bold");
@@ -425,7 +477,7 @@ var snoopOK = function(data, textStatus, request) {
 								"display": "block"
 							})
 							.addClass("bold")
-							.on("click", function(e) {
+							.on("click", function (e) {
 								$(`.entity${d.actor.login}`).toggle();
 								$(this).toggleClass("bold");
 							})
@@ -436,8 +488,13 @@ var snoopOK = function(data, textStatus, request) {
 				return;
 			}
 			eventIDs.push(d.id);
+
+			// localStorage.setItem(d.id+"", JSON.stringify(d));
+
 			addEventTypeUserData(d);
 			addEventTypeRepoData(d);
+			addUserEventTypeData(d);
+
 			var j = insertTimesYieldsI(d.created_at);
 			var row = buildRow(d);
 			if (j === 0) {
@@ -448,12 +505,12 @@ var snoopOK = function(data, textStatus, request) {
 		})(data[i])
 	}
 };
-var snoopNOTOK = function(err) {
+var snoopNOTOK = function (err) {
 	console.error(err);
 	$(".instructions").show();
 }
 
-var queryEntity = function(q) {
+var queryEntity = function (q) {
 	$.ajax({
 		url: `https://api.github.com/${q.resource}/events?access_token=${q.apikey}&page=${q.page}`,
 		dataType: 'json',
@@ -464,7 +521,7 @@ var queryEntity = function(q) {
 	});
 };
 
-var doSnoop = function(query) {
+var doSnoop = function (query) {
 	$("#response").empty();
 	$("#entities").empty();
 	$("#eventTypes").empty();
@@ -480,22 +537,22 @@ var doSnoop = function(query) {
 	}
 	for (var i = 0; i < qs.length; i++) {
 		for (var page = 1; page <= pageLimit; page++) {
-			(queryEntity)({resource: qs[i], page: page, apikey: apikey})
+			(queryEntity)({ resource: qs[i], page: page, apikey: apikey })
 		}
 	}
 };
 
-var setupLoginListeners = function() {
-	$("#input-enter-apikey").on("click", function() {
+var setupLoginListeners = function () {
+	$("#input-enter-apikey").on("click", function () {
 		apikey = $("#input-apikey").val();
 		if (apikey !== "") {
-			localStorage.setItem("badhub-apikey", apikey);
+			localStorage.setItem("bhak", reverseString(apikey));
 			authorized();
 		}
 	});
 };
 
-var handleTheme = function(isDark) {
+var handleTheme = function (isDark) {
 	if (isDark) {
 		if (!$("body").hasClass("darktheme")) {
 			$("body").addClass("darktheme")
@@ -509,66 +566,101 @@ var handleTheme = function(isDark) {
 	}
 };
 
-var setupAuthorizedListeners = function() {
-	$("#input-enter-query").on("click", function() {
+var setupAuthorizedListeners = function () {
+	$("#input-enter-query").on("click", function () {
 		console.log("clickaed");
 		doSnoop($("#input-query").val());
 	});
-	$("#showdetails").on("click", function() {
+	$("#showdetails").on("click", function () {
 		$(".details").toggle();
 	});
-	$("#eventTypes-toggleall").on("click", function() {
+	$("#eventTypes-toggleall").on("click", function () {
 		console.log("did clic");
-		$("#eventTypes span").each(function(i) {
+		$("#eventTypes span").each(function (i) {
 			$(`.event${$(this).attr("id")}`).toggleClass("hidden");
 			$(this).toggleClass("bold");
 		});
-		
+
 		eventTypesPreferHidden = [];
-		$("#eventTypes span").each(function(i) {
+		$("#eventTypes span").each(function (i) {
 			if (!$(this).hasClass("bold")) {
 				var t = $(this).attr("id");
 				storeEventTypeHiddenPref(t);
 			}
 		});
 	});
-	$("#entities-toggleall").on("click", function() {
+	$("#entities-toggleall").on("click", function () {
 		console.log("did clic");
-		$("#entities span").each(function(i) {
+		$("#entities span").each(function (i) {
 			$(`.entity${$(this).attr("id")}`).toggle();
 			$(this).toggleClass("bold");
 		});
 	});
-	$("#toggle-darktheme").on("click", function(e) {
+	$("#toggle-darktheme").on("click", function (e) {
 		handleTheme(!$("body").hasClass("darktheme"));
 	});
-	$("#toggle-charts").on("click", function(e) {
+	$("#toggle-charts").on("click", function (e) {
 		$(".chart-holder").toggleClass("hidden");
 	});
 };
 
-var authorized = function() {
+var authorized = function () {
 	$("#login").hide();
 	$("#main").show();
-	var existingQ = localStorage.getItem("badhub-query");
+
+	var existingQ = getValueFromURLOrStored("badhub-query");
 	$("#input-query").val(existingQ);
+
 	setupAuthorizedListeners();
 	loadEventTypePrefs();
 	setupCharts();
+
 	if (existingQ !== "" && existingQ !== null) {
 		doSnoop(existingQ);
 	}
+};
+
+var getValueFromURLOrStored = function (lookKey) {
+	var search = window.location.href;
+	const hashes = search.slice(search.indexOf('?') + 1).split('&');
+
+	const params = {};
+	hashes.map(hash => {
+		const [key, val] = hash.split('=')
+		params[key] = decodeURIComponent(val)
+	});
+
+	if (params[lookKey]) {
+		console.log("look key", lookKey, params[lookKey]);
+		return params[lookKey];
+	}
+
+	return localStorage.getItem(lookKey);
+};
+
+var valueOk = function (val) {
+	return (typeof val !== "undefined") && (val !== null) && (val !== "");
 }
+
+var reverseString = function (str) {
+	var splitString = str.split("");
+	var reverseArray = splitString.reverse();
+	return reverseArray.join("");
+};
 
 $(function () {
 	setupLoginListeners();
-	var storedThemePref = localStorage.getItem("badhub-darktheme");
-	handleTheme(storedThemePref !== null && storedThemePref !== "");
-	var getKey = localStorage.getItem("badhub-apikey");
-	if (getKey === null || getKey === "") {
-		$("#login .error").show();
-	} else {
-		apikey = getKey;
+
+	var dark = getValueFromURLOrStored("badhub-darktheme");
+	handleTheme(valueOk(dark));
+
+	var key = getValueFromURLOrStored("bhak");
+	if (valueOk(key)) {
+		console.log("have key", key);
+		apikey = reverseString(key);
 		authorized();
+	} else {
+		console.log("no key", key);
+		$("#login .error").show();
 	}
 });

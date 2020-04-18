@@ -15,6 +15,41 @@ function random_color(format) {
     }
 }
 
+// Hash any string into an integer value
+// Then we'll use the int and convert to hex.
+function hashCode(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return hash;
+}
+
+// Convert an int to hexadecimal with a max length
+// of six characters.
+function intToARGB(i) {
+    var hex = ((i>>24)&0xFF).toString(16) +
+            ((i>>16)&0xFF).toString(16) +
+            ((i>>8)&0xFF).toString(16) +
+            (i&0xFF).toString(16);
+    // Sometimes the string returned will be too short so we 
+    // add zeros to pad it out, which later get removed if
+    // the length is greater than six.
+    hex += '000000';
+    return hex.substring(0, 6);
+}
+
+// Extend the string type to allow converting to hex for quick access.
+String.prototype.toHexColour = function() {
+    return intToARGB(hashCode(this));
+}
+
+var assignedColors = {
+    actor: {},
+    repo: {},
+    event: {},
+};
+
 var config = {
     type: 'bar',
     data: {
@@ -45,7 +80,18 @@ var config = {
     }
 };
 
-var addEventTypeUserData = function(data) {
+var getExistingOrRandomColor = function (entityType, entity) {
+    var set = assignedColors[entityType][entity];
+    if (set) {
+        return set;
+    }
+    var n = "#" + entity.toHexColour();
+    // var n = random_color("hex");
+    assignedColors[entityType][entity] = n;
+    return n;
+};
+
+var addEventTypeUserData = function (data) {
     var eventIndex = config.data.labels.indexOf(data.type.replace("Event", ""));
     if (eventIndex < 0) {
         config.data.labels.push(data.type.replace("Event", ""));
@@ -60,7 +106,7 @@ var addEventTypeUserData = function(data) {
         }
     }
     if (userEventIndex < 0) {
-        var color = random_color("hex");
+        var color = getExistingOrRandomColor("actor", data.actor.login);
         var colorLight = color;
         var colorBold = color;
         config.data.datasets.push({
@@ -69,7 +115,7 @@ var addEventTypeUserData = function(data) {
             borderColor: colorBold,
             pointBackgroundColor: colorBold,
             data: []
-                // hidden: true
+            // hidden: true
         })
         userEventIndex = config.data.datasets.length - 1;
     }
@@ -83,7 +129,7 @@ var addEventTypeUserData = function(data) {
         }
     }
     config.data.datasets[userEventIndex].data[eventIndex]++;
-    window.myRadar.update();
+    window.eventTypesActorsChart.update();
 };
 
 var config2 = {
@@ -116,7 +162,7 @@ var config2 = {
     }
 };
 
-var addEventTypeRepoData = function(data) {
+var addEventTypeRepoData = function (data) {
     var eventIndex = config2.data.labels.indexOf(data.type.replace("Event", ""));
     if (eventIndex < 0) {
         config2.data.labels.push(data.type.replace("Event", ""));
@@ -131,7 +177,7 @@ var addEventTypeRepoData = function(data) {
         }
     }
     if (userEventIndex < 0) {
-        var color = random_color("hex");
+        var color = getExistingOrRandomColor("repo", data.repo.name);
         var colorLight = color;
         var colorBold = color;
         config2.data.datasets.push({
@@ -154,7 +200,7 @@ var addEventTypeRepoData = function(data) {
         }
     }
     config2.data.datasets[userEventIndex].data[eventIndex]++;
-    window.myOtherRadar.update();
+    window.eventTypesReposChart.update();
 };
 
 var config3 = {
@@ -187,34 +233,40 @@ var config3 = {
     }
 };
 
-var addUserEventTypeData = function(data) {
-    var eventIndex = config3.data.labels.indexOf(data.type.replace("Event", ""));
-    if (eventIndex < 0) {
-        config3.data.labels.push(data.type.replace("Event", ""));
-        eventIndex = config3.data.labels.length - 1;
+// addUserEventTypeData
+var addUserEventTypeData = function (data) {
+
+    var eventType = data.type.replace("Event", "");
+    var actor = data.actor.login;
+
+    var actorIndex = config3.data.labels.indexOf(actor);
+    if (actorIndex < 0) {
+        config3.data.labels.push(actor);
+        actorIndex = config3.data.labels.length - 1;
     }
-    // get if user already has a dataset
-    var userEventIndex = -1;
+
+    var eventTypeIndex = -1;
     for (var i = 0; i < config3.data.datasets.length; i++) {
-        if (config3.data.datasets[i].label === data.actor.login) {
-            userEventIndex = i;
+        if (config3.data.datasets[i].label == eventType) {
+            eventTypeIndex = i;
             break;
         }
     }
-    if (userEventIndex < 0) {
-        var color = random_color("hex");
+    if (eventTypeIndex < 0) {
+        var color = getExistingOrRandomColor("event", eventType);
         var colorLight = color;
         var colorBold = color;
+
         config3.data.datasets.push({
-            label: data.actor.login,
+            label: eventType,
             backgroundColor: colorLight, // TODO
             borderColor: colorBold,
             pointBackgroundColor: colorBold,
             data: []
-                // hidden: true
         })
-        userEventIndex = config3.data.datasets.length - 1;
+        eventTypeIndex = config3.data.datasets.length - 1;
     }
+
     for (var i = 0; i < config3.data.datasets.length; i++) {
         if (config3.data.labels.length > config3.data.datasets[i].data.length) {
             // get length diff
@@ -224,10 +276,66 @@ var addUserEventTypeData = function(data) {
             }
         }
     }
-    config3.data.datasets[userEventIndex].data[eventIndex]++;
-    window.myRadar.update();
+
+    config3.data.datasets[eventTypeIndex].data[actorIndex]++;
+    window.actorsEventTypesChart.update();
+
+    /// ---------------------------------------------------------------
+    // var eventType = data.type.replace("Event", "");
+    // var eventIndex = config3.data.labels.indexOf(eventType);
+    // if (eventIndex < 0) {
+    //     config3.data.labels.push(data.type.replace("Event", ""));
+    //     eventIndex = config3.data.labels.length - 1;
+    // }
+    // // get if user already has a dataset
+    // var userEventIndex = -1;
+    // for (var i = 0; i < config3.data.datasets.length; i++) {
+    //     if (config3.data.datasets[i].label === data.actor.login) {
+    //         userEventIndex = i;
+    //         break;
+    //     }
+    // }
+    // if (userEventIndex < 0) {
+    //     var color = random_color("hex");
+    //     var colorLight = color;
+    //     var colorBold = color;
+    //     config3.data.datasets.push({
+    //         label: data.actor.login,
+    //         backgroundColor: colorLight, // TODO
+    //         borderColor: colorBold,
+    //         pointBackgroundColor: colorBold,
+    //         data: []
+    //             // hidden: true
+    //     })
+    //     userEventIndex = config3.data.datasets.length - 1;
+    // }
+    // for (var i = 0; i < config3.data.datasets.length; i++) {
+    //     if (config3.data.labels.length > config3.data.datasets[i].data.length) {
+    //         // get length diff
+    //         var lenDiff = config3.data.labels.length - config3.data.datasets[i].data.length;
+    //         for (var j = 0; j < lenDiff; j++) {
+    //             config3.data.datasets[i].data.push(0);
+    //         }
+    //     }
+    // }
+    // config3.data.datasets[userEventIndex].data[eventIndex]++;
+    // window.eventTypesActorsChart.update();
 };
 
+var setupCharts = function () {
+    window.eventTypesActorsChart = new Chart(document.getElementById('chart-eventType-user'), config);
+    window.actorsEventTypesChart = new Chart(document.getElementById('chart-user-eventType'), config3);
+    window.eventTypesReposChart = new Chart(document.getElementById('chart-eventType-repo'), config2);
+    // document.getElementById('randomizeData').addEventListener('click', function () {
+    // 	config.data.datasets.forEach(function (dataset) {
+    // 		dataset.data = dataset.data.map(function () {
+    // 			return randomScalingFactor();
+    // 		});
+    // 	});
+
+    // 	window.eventTypesActorsChart.update();
+    // });
+};
 
 // var config3 = {
 // 	type: 'bar',
@@ -299,23 +407,11 @@ var addUserEventTypeData = function(data) {
 // 		}
 // 	}
 // 	config3.data.datasets[userEventIndex].data[eventIndex]++;
-// 	window.myOtherRadar.update();
+// 	window.eventTypesReposChart.update();
 // };
 
 
-var setupCharts = function() {
-    window.myRadar = new Chart(document.getElementById('chart-eventType-user'), config);
-    window.myOtherRadar = new Chart(document.getElementById('chart-eventType-repo'), config2);
-    // document.getElementById('randomizeData').addEventListener('click', function () {
-    // 	config.data.datasets.forEach(function (dataset) {
-    // 		dataset.data = dataset.data.map(function () {
-    // 			return randomScalingFactor();
-    // 		});
-    // 	});
 
-    // 	window.myRadar.update();
-    // });
-};
 
 // var colorNames = Object.keys(window.chartColors);
 
@@ -336,7 +432,7 @@ var setupCharts = function() {
 // 	}
 
 // 	config.data.datasets.push(newDataset);
-// 	window.myRadar.update();
+// 	window.eventTypesActorsChart.update();
 // });
 
 // document.getElementById('addData').addEventListener('click', function () {
@@ -347,13 +443,13 @@ var setupCharts = function() {
 // 			dataset.data.push(randomScalingFactor());
 // 		});
 
-// 		window.myRadar.update();
+// 		window.eventTypesActorsChart.update();
 // 	}
 // });
 
 // document.getElementById('removeDataset').addEventListener('click', function () {
 // 	config.data.datasets.splice(0, 1);
-// 	window.myRadar.update();
+// 	window.eventTypesActorsChart.update();
 // });
 
 // document.getElementById('removeData').addEventListener('click', function () {
@@ -363,5 +459,5 @@ var setupCharts = function() {
 // 		dataset.data.pop();
 // 	});
 
-// 	window.myRadar.update();
+// 	window.eventTypesActorsChart.update();
 // });
