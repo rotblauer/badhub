@@ -66,16 +66,18 @@ var formatPayload = function (eventType, data) {
 	switch (eventType) {
 		case "PushEvent":
 			var cr = data.payload.commits.reverse();
+			out += `<div class="commits">`
 			for (var i = 0; i < cr.length; i++) {
 				out += (function (c) {
 					return `
 						<div id="${c.sha}" class="commit">
 						<code>*</code> <a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit"><code>${c.sha.substring(0, 8)}</code></a>
-						<code> ${c.author.name} (${data.payload.ref.replace("refs/heads/", "")}) ${c.message}</code>
+						<code class="commit-branch">${data.payload.ref.replace("refs/heads/", "")}</code> <code class="commit-author">${c.author.name}</code> <code class="commit-message">${c.message}</code>
 						</div>
 					`;
 				})(cr[i]);
 			}
+			out += `</div>`;
 			break;
 		case "CreateEvent":
 			out = `${data.payload.ref_type}: `
@@ -100,17 +102,17 @@ var formatPayload = function (eventType, data) {
 			break;
 		case "IssuesEvent":
 			out = `
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span>
-			<a href="${data.payload.issue.html_url}" target="_">(#${data.payload.issue.number}) ${data.payload.issue.title}</a>
+			<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong>
+			<strong>${data.payload.issue.title}</strong> (<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
 			`;
 			break;
 		case "PullRequestEvent":
 			var action = data.payload.action === "closed" && data.payload.pull_request.merged ? "merged" : data.payload.action;
 
 			out = `
-			<span style="color: ${actionColor(action)};">${action}</span>
+			<strong style="color: ${actionColor(action)};">${action}</strong>
 			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.number}) ${data.payload.pull_request.title}</a> 
-			<span style="font-size: 0.8em;"><span style="color: green;">+${data.payload.pull_request.additions}</span>/<span style="color: red;">-${data.payload.pull_request.deletions}</span>,<span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
+			<span class="diff-stat"><span style="color: green;">+${data.payload.pull_request.additions}</span> / <span style="color: red;">-${data.payload.pull_request.deletions}</span> , <span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
 			<p>
 			<span style="color: ${actionColor(action)}; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
 			`;
@@ -124,9 +126,10 @@ var formatPayload = function (eventType, data) {
 		case "IssueCommentEvent":
 			out = `
 
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span> <span style="color: #bbb">@</span> <a href="${data.payload.issue.html_url}" target="_">(#${data.payload.issue.number}) ${data.payload.issue.title}</a> 
+			<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action} issue comment</strong>
+			<span style="color: #bbb">@</span> <strong>${data.payload.issue.title}</strong> (<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>) 
 
-			<blockquote style="color: #aaa;">
+			<blockquote>
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + " [...]" : data.payload.comment.body}
 			<a href="${data.payload.comment.html_url}" target="_"><sup>link</sup></a>
 			</blockquote>
@@ -138,12 +141,12 @@ var formatPayload = function (eventType, data) {
 		case "PullRequestReviewCommentEvent":
 
 			out = `
+			<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action} PR review comment</strong> <span style="color: #bbb">@</span> 
+			<strong>${data.payload.pull_request.title}</strong> (<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.pull_request.number}</a>) <span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
+			<br>
+			<span style="color: gray; display: block; font-size: 1em;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
 
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span>
-			<a href="${data.payload.pull_request.html_url}" target="_">(#${data.payload.pull_request.number}) ${data.payload.pull_request.title}</a> 
-			<span style="color: ${actionColor(data.payload.action)}; display: block; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
-
-			<blockquote style="color: #aaa;">
+			<blockquote>
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + " [...]" : data.payload.comment.body}
 			<a href="${data.payload.comment.html_url}" target="_"><sup>link</sup></a>
 			</blockquote>
@@ -153,7 +156,7 @@ var formatPayload = function (eventType, data) {
 			out = `
 			<span style="color: #bbb">@</span> <a href="${data.payload.comment.html_url}" target="_">link</a> 
 
-			<blockquote style="color: #aaa;">
+			<blockquote>
 			${data.payload.comment.body.length > 140 ? data.payload.comment.body.substring(0, 140) + "[...]" : data.payload.comment.body}
 			</blockquote>
 
@@ -161,7 +164,7 @@ var formatPayload = function (eventType, data) {
 			break;
 		case "ReleaseEvent":
 			out = `
-			<span style="color: ${actionColor(data.payload.action)};">${data.payload.action}</span> <a href="${data.payload.release.html_url}">${data.payload.release.tag_name}: ${data.payload.release.name}</a>
+			<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong> <a href="${data.payload.release.html_url}">${data.payload.release.tag_name}: ${data.payload.release.name}</a>
 			<blockquote>
 			<code>${data.payload.release.body}
 			</code>
@@ -226,7 +229,7 @@ var formatEventName = function (data) {
 			n += `📝`;
 			break;
 		case "PullRequestReviewCommentEvent":
-			n += `🖍`;
+			n += `\u{1F913}`; // `🖍`;
 			break;
 		case "CommitCommentEvent":
 			n += '💬';
@@ -341,7 +344,7 @@ var buildRow = function (d) {
 	<td style="color: #ccc;">
 		${minimalTimeDisplay(moment(d.created_at))}
 	</td>
-	<td>
+	<td class="avatar">
 		<img src="${d.actor.avatar_url}" style="max-height: 2em;" />
 	</td>
 	<td style="min-width: 100px;">
@@ -365,7 +368,7 @@ var buildRow = function (d) {
 		<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d.payload, null, 4)}</code>
 	</td>
 	</tr>
-	`);
+	`) || true;
 }
 
 function convertMS(milliseconds) {
@@ -442,7 +445,7 @@ var snoopOK = function (data, textStatus, request) {
 			// governed by the pager
 			var createdAt = Date.parse(d.created_at);
 			var age = Date.now() - createdAt;
-			if (convertMS(age).day > 8) {
+			if (convertMS(age).day > 14) {
 				return;
 			}
 
@@ -465,7 +468,7 @@ var snoopOK = function (data, textStatus, request) {
 							// .addClass("bold")
 							.addClass(`${preferredHidden ? "" : "bold"}`)
 							.on("click", function (e) {
-								$(`.event${d.type}`).toggleClass("hidden");
+								$(`tr.event${d.type}`).toggleClass("hidden");
 								storeEventTypeHiddenPref(d.type);
 								$(this).toggleClass("bold");
 							})
@@ -482,7 +485,7 @@ var snoopOK = function (data, textStatus, request) {
 							})
 							.addClass("bold")
 							.on("click", function (e) {
-								$(`.entity${d.actor.login}`).toggle();
+								$(`tr.entity${d.actor.login}`).toggle();
 								$(this).toggleClass("bold");
 							})
 					)

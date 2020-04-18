@@ -6,53 +6,97 @@
 
 <body class="">
     <style>
-            .details {
+        .details {
             display: none;
         }
-        
+
         table {
             background-color: #f6f8fa;
         }
-        table tbody tr {
-            vertical-align: top;
-        }
+
         td {
+            vertical-align: top !important;
             overflow-wrap: break-word;
+            padding: 0.5em;
         }
+
         td.apayload {
             padding-bottom: 0.5em;
         }
-    
-        
+
         .bold {
             font-weight: bold;
-            td {
-                vertical-align: baseline;
-            }
-            pre {
-                display: block;
-                background-color: rgba(240, 240, 240, 0.5);
-            }
-            code {
-                white-space: pre-wrap;
-                overflow: normal;
-            }
-            .hidden {
-                display: none !important;
-            }
-            body.darktheme {
-                background-color: #270000;
-                color: white;
-            }
-            body.darktheme a {
-                color: lightblue;
-            }
-            body.darktheme a.commit {
-                color: #eee;
-            }
+        }
+
+        pre {
+            display: block;
+            background-color: rgba(240, 240, 240, 0.5);
+        }
+
+        code {
+            white-space: pre-wrap;
+            overflow: normal;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        body.darktheme {
+            background-color: #270000;
+            color: white;
+        }
+
+        body.darktheme a {
+            color: lightblue;
+        }
+
+        body.darktheme a.commit {
+            color: #eee;
+        }
+
+        blockquote {
+            background-color: white;
+            padding: 0.7em 0.7em 0.7em 1.4em;
+            border-radius: 0em 0.5em 0.5em 0.5em;
+            border: 1px solid gainsboro;
+            color: #333;
+        }
+
+        span.diff-stat {
+            font-size: 0.8em;
+            background-color: white;
+            padding: 0.3em 0.5em 0em 0.4em;
+            border-radius: 0.3em 0.3em 0 0;
+            border: 1px solid darkgray;
+            border-bottom: 2px dashed white;
+            margin-left: 2em;
+        }
+
+        .commits {
+            background-color: #333;
+            color: whitesmoke;
+            font-size: 1.2em;
+            padding: 0.5em 0 0.5em 1em;
+            border-radius: 0 0 0.3em 0.3em;
+        }
+        code.commit-branch {
+            color: lime;
+        }
+        code.commit-author {
+            color: gray;
+        }
+        code.commit-message {
+        }
+        span.pr-user-login {
+            color: darkred;
+            background-color: whitesmoke;
+            border-radius: 0.3em;
+        }
     </style>
     <div id="main" style="display: none;">
-        <small class="instructions" style="color:green;"><strong>example:</strong> <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
+        <small class="instructions" style="color:green;"><strong>example:</strong>
+            <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
         <input type="text" id="input-query" style="width: 90vw;">
         <button id="input-enter-query">snoop</button>
         <p>
@@ -74,13 +118,16 @@
             <div id="entities" style=""></div>
         </div>
 
-        <div id="charts-holder-1" class="chart-holder hidden" style="display: inline-block;position: relative; width: 80vw;">
+        <div id="charts-holder-1" class="chart-holder hidden"
+            style="display: inline-block;position: relative; width: 80vw;">
             <canvas id="chart-eventType-user" class="chart"></canvas>
         </div>
-        <div id="charts-holder-3" class="chart-holder hidden" style="display: inline-block;position: relative; width: 80vw;">
+        <div id="charts-holder-3" class="chart-holder hidden"
+            style="display: inline-block;position: relative; width: 80vw;">
             <canvas id="chart-user-eventType" class="chart"></canvas>
         </div>
-        <div id="charts-holder-2" class="chart-holder hidden" style="display: inline-block; position: relative; width: 80vw;">
+        <div id="charts-holder-2" class="chart-holder hidden"
+            style="display: inline-block; position: relative; width: 80vw;">
             <canvas id="chart-eventType-repo" class="chart"></canvas>
         </div>
 
@@ -90,7 +137,8 @@
     </div>
 
     <div id="login">
-        <h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/" target="_">a github api token</a></h1>
+        <h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/"
+                target="_">a github api token</a></h1>
         <blockquote>this will only be stored in <code>localStorage</code></blockquote>
         <p class="error" style="display: none;">you have to have one</p>
         <input id="input-apikey" type="text">
@@ -98,7 +146,8 @@
     </div>
 
     <!-- scripts -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
     <script src="moment.min.js"></script>
