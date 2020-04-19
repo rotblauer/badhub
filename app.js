@@ -67,6 +67,9 @@ var md = window.markdownit({linkify: true, breaks: true});
 var formatPayload = function (eventType, data) {
     var out = "";
     switch (eventType) {
+        // ---------------------------------------------------------------------------
+        // PUSH Event
+        // ---------------------------------------------------------------------------
         case "PushEvent":
             var cr = data.payload.commits.reverse();
             out += `<div class="commits">`
@@ -82,6 +85,10 @@ var formatPayload = function (eventType, data) {
             }
             out += `</div>`;
             break;
+
+        // ---------------------------------------------------------------------------
+        // CREATE Event
+        // ---------------------------------------------------------------------------
         case "CreateEvent":
             out = `${data.payload.ref_type}: `
             if (data.payload.ref_type === "branch" && data.payload.pusher_type === "user" && data.payload.master_branch !== data.payload.ref) {
@@ -95,29 +102,50 @@ var formatPayload = function (eventType, data) {
             }
 
             break;
+
+        // ---------------------------------------------------------------------------
+        // FORK Event
+        // ---------------------------------------------------------------------------
         case "ForkEvent":
             out = `<a href="${data.payload.forkee.html_url}" target="_">${data.payload.forkee.full_name}</a>`
             break;
+
+        // ---------------------------------------------------------------------------
+        // DELETE Event
+        // ---------------------------------------------------------------------------
         case "DeleteEvent":
             out = `${data.payload.ref_type}: ${data.payload.ref}`;
             break;
+
+        // ---------------------------------------------------------------------------
+
         case "WatchEvent":
             break;
+        // ---------------------------------------------------------------------------
+
         case "IssuesEvent":
             out = `
-			<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong>
-			<strong>${data.payload.issue.title}</strong> (<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
+<div class="event-user-action-container">
       &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>
+			&nbsp;<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong>
+</div>
+			<strong>${data.payload.issue.title}</strong> (<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
             `;
             out += `<div class="issue-body">`;
             out += md.render(data.payload.issue.body);
             out += `</div>`;
             break;
+        // ---------------------------------------------------------------------------
+
         case "PullRequestEvent":
             var action = data.payload.action === "closed" && data.payload.pull_request.merged ? "merged" : data.payload.action;
 
             out = `
-			<strong style="color: ${actionColor(action)};">${action}</strong>&nbsp;
+<div class="event-user-action-container">
+      &nbsp;<span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
+			&nbsp;<strong style="color: ${actionColor(action)};">${action}</strong>
+</div>
+
       <strong>${data.payload.pull_request.title}</strong>`;
 
             for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
@@ -127,26 +155,32 @@ var formatPayload = function (eventType, data) {
             }
 
             out += `
-			(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.number}</a>)&nbsp;
-      <span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
+			(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.number}</a>)
 
 			<p>
 			<span class="diff-stat"><span style="color: green;">+${data.payload.pull_request.additions}</span> / <span style="color: red;">-${data.payload.pull_request.deletions}</span> , <span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
 			<span style="color: gray; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
-            </p>`;
+      </p>`;
 
             out += `<div class="issue-body">`;
             out += md.render(data.payload.pull_request.body);
             out += `</div>`;
 
             break;
+        // ---------------------------------------------------------------------------
+
 
         case "IssueCommentEvent":
             out = `
-
 <div class="comment-issue-pr-payload">
+
 <div class="comment-header">
-			<span style="color: #bbb">@</span> <strong>${data.payload.issue.title}</strong>`;
+<div class="event-user-action-container">
+      &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>
+</div>
+<span style="color: #bbb">@</span>
+&nbsp;<strong>${data.payload.issue.title}</strong>
+`;
 
             for (var j = 0; j < data.payload.issue.labels.length; j++) {
                 out += (function (l) {
@@ -155,38 +189,50 @@ var formatPayload = function (eventType, data) {
             }
 
             out += `
-&nbsp;(<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
-      &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>`;
+      &nbsp;(<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
+</div>
+`;
 
             out += `<div class="issue-body">`;
             out += md.render(data.payload.issue.body);
             out += `</div>`;
 
             out += `
-</div>`;
-
-            out += `
-
-			<div class="payload-comment">
-
+<div class="payload-comment">
 <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
-
 ${md.render(data.payload.comment.body)}
-			</div>
+</div>
+
 </div>
 			`;
             break;
+        // ---------------------------------------------------------------------------
+
 
 
         case "PullRequestReviewEvent":
             out = `<h1 style="color: yellow;">PullRequestReviewEvent NOT IMPLEMENTED</h1>`;
             break;
+
+
+
+        // ---------------------------------------------------------------------------
+
         case "PullRequestReviewCommentEvent":
 
             out = `
 <div class="comment-issue-pr-payload">
 <div class="comment-header">
-			<span style="color: #bbb">@</span> <strong>${data.payload.pull_request.title}</strong>`;
+
+<div class="event-user-action-container">
+            &nbsp;(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.pull_request.number}</a>)
+            &nbsp;<span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
+</div>
+
+<span style="color: #bbb">@</span> <strong>${data.payload.pull_request.title}</strong>
+
+</div>
+`;
 
             for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
                 out += (function (l) {
@@ -195,37 +241,40 @@ ${md.render(data.payload.comment.body)}
             }
 
             out += `
-&nbsp;(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.pull_request.number}</a>)
-<span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
-			<br>
-			<span style="color: gray; display: block; font-size: 1em;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
+<br>
+<div style="padding-left: 1em;">
+                <span style="color: gray; display: block; font-size: 1em;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
 </div>
 
-            <div class="payload-comment">
-            <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+<div class="payload-comment">
+    <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+    ${md.render( data.payload.comment.body)}
+</div>
 
-			${data.payload.comment.body.length > 1400 ? data.payload.comment.body.substring(0, 1400) + " [...]" : data.payload.comment.body}
-
-			</div>
 </div>
 			`;
             break;
+        // ---------------------------------------------------------------------------
+
 
         case "CommitCommentEvent":
             out = `
 <div class="comment-issue-pr-payload">
+
 <div class="comment-header">
 			<span style="color: #bbb">@</span> <a href="${data.payload.comment.html_url}" target="_">link</a>
 </div>
 
-            <div class="payload-comment">
-            <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
-
-			${data.payload.comment.body.length > 1400 ? data.payload.comment.body.substring(0, 1400) + "[...]" : data.payload.comment.body}
-			</div>
+<div class="payload-comment">
+    <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+    ${md.render( data.payload.comment.body)}
 </div>
-			`
+
+</div>
+			`;
             break;
+        // ---------------------------------------------------------------------------
+
         case "ReleaseEvent":
             out = `
 			<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong> <a href="${data.payload.release.html_url}">${data.payload.release.tag_name}: ${data.payload.release.name}</a>
@@ -233,14 +282,18 @@ ${md.render(data.payload.comment.body)}
 			<code>${data.payload.release.body}
 			</code>
 			</div>
-			`
+			`;
             break;
+        // ---------------------------------------------------------------------------
+
         case "MemberEvent":
             out = `
 			<img src="${data.payload.member.avatar_url}" style="display: inline-block; max-height: 1em; margin-right: 5px;"/>
 			<a href="https://github.com/${data.payload.member.login}" target="_">${data.payload.member.login}</a>
-			`
+			`;
             break;
+        // ---------------------------------------------------------------------------
+
         case "GollumEvent":
             // wiki. weird name for an event.
             var cr = data.payload.pages.reverse();
@@ -254,9 +307,12 @@ ${md.render(data.payload.comment.body)}
                 })(cr[i]);
             }
             break;
+        // ---------------------------------------------------------------------------
+
         default:
             out = `⚠️`;
             break;
+
     }
     return out;
 }
@@ -432,7 +488,7 @@ var buildRow = function (d) {
 	<td class="apayload" >
 		${formatPayload(d.type, d)}
     </td>
-    
+
     <td style="color: #ccc;">
     ${minimalTimeDisplay(moment(d.created_at))}
     </td>

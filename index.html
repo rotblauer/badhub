@@ -16,8 +16,12 @@
 
     table {
         background-color: #f6f8fa;
+        max-width: 100%;
     }
 
+ tr {
+     max-width: 100%;
+ }
     td {
         vertical-align: top !important;
         overflow-wrap: break-word;
@@ -85,10 +89,9 @@
     .payload-comment {
         font-family: sans-serif;
         background-color: white;
-        padding: 0.7em 0.7em 0.1em 1.4em;
+        padding: 0.7em 0.7em 0.7em 1.4em;
         color: #333;
         margin-top: 1em;
-        /* max-width: 60%; */
         max-height: 20vh;
 
         overflow-y: scroll;
@@ -113,7 +116,6 @@
         font-size: 1.2em;
         padding: 0.5em 0 0.5em 1em;
         border-radius: 0 0 0.3em 0.3em;
-        /* max-width: 60%; */
     }
 
     code.commit-branch {
@@ -129,9 +131,12 @@
 
     span.pr-user-login {
         color: #587197;
-        float: right;
         border-radius: 0.3em;
     }
+ .event-user-action-container {
+     float: right;
+     display: inline-block;
+ }
 
     tr.event-row {
         margin-top: 1em;
@@ -150,9 +155,13 @@
     }
 
     .issue-body {
+        cursor: pointer;
         color: darkgray;
-        max-height: 3.2em;
+        padding-left: 1em;
+        max-height: 3.8em;
         overflow-y: hidden;
+        max-width: 60vw;
+        overflow-x: scroll;
     }
 
     .issue-body-expanded {
