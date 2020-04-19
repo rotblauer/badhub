@@ -588,6 +588,11 @@ var snoopOK = function (data, textStatus, request) {
     for (var i = 0; i < data.length; i++) {
         (function (d) {
 
+            // already have this event from some other entity
+            if (eventIDs.indexOf(d.id) >= 0) {
+                return;
+            }
+
             // filter by date, leaving out old events
             // othewise all users will have same number of events since the getter is
             // governed by the pager
@@ -619,7 +624,7 @@ var snoopOK = function (data, textStatus, request) {
                                 storeEventTypeHiddenPref(d.type);
                                 $(this).toggleClass("bold");
                             })
-                    )
+                    );
             }
             if ($(`#entities #${d.actor.login}`).length === 0) {
                 $("#entities")
@@ -635,13 +640,9 @@ var snoopOK = function (data, textStatus, request) {
                                 $(`tr.entity${d.actor.login}`).toggle();
                                 $(this).toggleClass("bold");
                             })
-                    )
+                    );
             }
-            // add row to table
-            if (eventIDs.indexOf(d.id) >= 0) {
-                return;
-            }
-            eventIDs.push(d.id);
+                     eventIDs.push(d.id);
 
 
             addEventTypeUserData(d);
@@ -659,7 +660,7 @@ var snoopOK = function (data, textStatus, request) {
             } else {
                 $(`#tabledata > tr:nth-child(${j})`).after(row);
             }
-        })(data[i])
+        })(data[i]);
     }
 };
 var snoopNOTOK = function (err) {
@@ -709,20 +710,6 @@ var setupLoginListeners = function () {
     });
 };
 
-var handleTheme = function (isDark) {
-    if (isDark) {
-        if (!$("body").hasClass("darktheme")) {
-            $("body").addClass("darktheme")
-        }
-        localStorage.setItem("badhub-darktheme", "1")
-    } else {
-        if ($("body").hasClass("darktheme")) {
-            $("body").removeClass("darktheme")
-        }
-        localStorage.setItem("badhub-darktheme", "")
-    }
-};
-
 var setupAuthorizedListeners = function () {
     $("#input-enter-query").on("click", function () {
         console.log("clickaed");
@@ -753,11 +740,10 @@ var setupAuthorizedListeners = function () {
             $(this).toggleClass("bold");
         });
     });
-    $("#toggle-darktheme").on("click", function (e) {
-        handleTheme(!$("body").hasClass("darktheme"));
-    });
     $("#toggle-charts").on("click", function (e) {
-        $(".chart-holder").toggleClass("hidden");
+        $("#all-charts").toggleClass("hidden");
+        $("#response").toggleClass("hidden");
+        $("#list-filter-palette").toggleClass("hidden");
     });
 };
 
@@ -805,11 +791,22 @@ var reverseString = function (str) {
     return str.slice(0, 1) + reverseArray.join("");
 };
 
+var setupView = function() {
+    var pref = getValueFromURLOrStored("view");
+    if (!valueOk(pref)) { return; } // no preference, use coded defaults
+    if (pref === "charts") {
+        $("#response").addClass("hidden");
+        $("#list-filter-palette").addClass("hidden");
+        $("#all-charts").removeClass("hidden");
+    } else if (pref === "list") {
+        $("#response").removeClass("hidden");
+        $("#list-filter-palette").removeClass("hidden");
+        $("#all-charts").addClass("hidden");
+    }
+};
+
 $(function () {
     setupLoginListeners();
-
-    var dark = getValueFromURLOrStored("badhub-darktheme");
-    handleTheme(valueOk(dark));
 
     var key = getValueFromURLOrStored("bhak");
     if (valueOk(key)) {
@@ -820,4 +817,5 @@ $(function () {
         console.log("no key", key);
         $("#login .error").show();
     }
+
 });

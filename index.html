@@ -18,6 +18,9 @@
         background-color: #f6f8fa;
         max-width: 100%;
     }
+ a {
+     text-decoration: none;
+ }
 
  tr {
      max-width: 100%;
@@ -162,6 +165,7 @@
         overflow-y: hidden;
         max-width: 60vw;
         overflow-x: scroll;
+        cursor: pointer;
     }
 
     .issue-body-expanded {
@@ -176,12 +180,11 @@
     <button id="input-enter-query">snoop</button>
     <p>
         <span id="showdetails"><i>show details</i></span>&nbsp; |&nbsp;
-        <span id="toggle-darktheme"><i>toggle dark theme</i></span> |&nbsp;
         <span id="toggle-charts"><i>toggle charts</i></span>
     </p>
 
 
-    <div style="position: fixed; bottom: 0; right: 0; max-height: 50vh; overflow-y: scroll; background: white; padding: 1em; border: 6px solid rgb(235, 243, 251);">
+    <div id="list-filter-palette" style="position: fixed; bottom: 0; right: 0; max-height: 50vh; overflow-y: scroll; background: white; padding: 1em; border: 6px solid rgb(235, 243, 251);">
         <a id="eventTypes-toggleall" style="color: black;"><i>&lt;Toggle all events</i>&gt;</a>
         <br>
         <!-- <br> toggle events: -->
@@ -193,17 +196,19 @@
         <div id="entities" style=""></div>
     </div>
 
-    <div id="charts-holder-1" class="chart-holder hidden"
+    <div id="all-charts" class="hidden">
+    <div id="charts-holder-1" class="chart-holder "
          style="display: inline-block;position: relative; width: 80vw;">
         <canvas id="chart-eventType-user" class="chart"></canvas>
     </div>
-    <div id="charts-holder-3" class="chart-holder hidden"
+    <div id="charts-holder-3" class="chart-holder "
          style="display: inline-block;position: relative; width: 80vw;">
         <canvas id="chart-user-eventType" class="chart"></canvas>
     </div>
-    <div id="charts-holder-2" class="chart-holder hidden"
+    <div id="charts-holder-2" class="chart-holder "
          style="display: inline-block; position: relative; width: 80vw;">
         <canvas id="chart-eventType-repo" class="chart"></canvas>
+    </div>
     </div>
 
 
