@@ -1,84 +1,3 @@
-var apikey = "";
-var pageLimit = 2; // 30 events per page // TODO FIXME add a user-configurable feature here
-
-var eligibleData = [];
-var eligibleActors = [];
-
-var actionColor = function (action) {
-    switch (action) {
-        case "created":
-            return "green";
-        case "opened":
-            return "green";
-        case "reopened":
-            return "lightgreen";
-        case "edited":
-            return "orange";
-        case "closed":
-            return "red";
-        case "published":
-            return "green";
-        case "merged":
-            return "#c31cff";
-    }
-    return "#ddd";
-};
-
-
-// accepts _moment()_ time
-var minimalTimeDisplay = function (time) {
-    return time.fromNow(true).replace("a few seconds", "0m").replace("a ", "1").replace("an", "1").replace("hours", "h").replace("hour", "h").replace("minutes", "m").replace("minute", "m").replace(" ", "").replace("days", "d").replace("day", "d").replace("months", "M").replace("month", "M");
-};
-
-// https://stackoverflow.com/a/35970186/4401322
-function padZero(str, len) {
-    len = len || 2;
-    var zeros = new Array(len).join('0');
-    return (zeros + str).slice(-len);
-}
-
-function invertColor(hex, bw) {
-    if (hex.indexOf('#') === 0) {
-        hex = hex.slice(1);
-    }
-    // convert 3-digit hex to 6-digits.
-    if (hex.length === 3) {
-        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-    if (hex.length !== 6) {
-        throw new Error('Invalid HEX color.');
-    }
-    var r = parseInt(hex.slice(0, 2), 16),
-        g = parseInt(hex.slice(2, 4), 16),
-        b = parseInt(hex.slice(4, 6), 16);
-    if (bw) {
-        // http://stackoverflow.com/a/3943023/112731
-        return (r * 0.299 + g * 0.587 + b * 0.114) > 186
-            ? '#000000'
-            : '#FFFFFF';
-    }
-    // invert color components
-    r = (255 - r).toString(16);
-    g = (255 - g).toString(16);
-    b = (255 - b).toString(16);
-    // pad each with zeros and return
-    return "#" + padZero(r) + padZero(g) + padZero(b);
-}
-
-
-var md = window.markdownit({
-    linkify: true,
-    breaks: true,
-    highlight: function (str, lang) {
-        if (lang && hljs.getLanguage(lang)) {
-            try {
-                return hljs.highlight(lang, str).value;
-            } catch (__) {}
-        }
-        return ''; // use external default escaping
-    }
-   });
-
 var formatPayload = function (eventType, data) {
     var out = "";
     switch (eventType) {
@@ -140,11 +59,13 @@ var formatPayload = function (eventType, data) {
 
         case "IssuesEvent":
             out = `
+<div class="comment-header">
 <div class="event-user-action-container">
       &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>
 			&nbsp;<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong>
 </div>
 			<strong>${data.payload.issue.title}</strong> (<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
+</div>
             `;
             out += `<div class="issue-body">`;
             out += md.render(data.payload.issue.body);
@@ -156,12 +77,15 @@ var formatPayload = function (eventType, data) {
             var action = data.payload.action === "closed" && data.payload.pull_request.merged ? "merged" : data.payload.action;
 
             out = `
+<div class="comment-header">
 <div class="event-user-action-container">
       &nbsp;<span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
 			&nbsp;<strong style="color: ${actionColor(action)};">${action}</strong>
 </div>
 
-      <strong>${data.payload.pull_request.title}</strong>`;
+      <strong>${data.payload.pull_request.title}</strong>
+</div>
+`;
 
             for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
                 out += (function (l) {
@@ -332,77 +256,8 @@ ${md.render(data.payload.comment.body)}
     return out;
 }
 
-var formatEventName = function (data) {
-    var n = "";
-    var eventName = data.type;
-    switch (eventName) {
-        case "PushEvent":
-            n += `\u{1F535}`; // ` `; // `\u{1F535}`; //`⬆️`;
-            break;
-        case "CreateEvent":
-            n += `🔰`;
-            break;
-        case "ForkEvent":
-            n += `🔀`;
-            break;
-        case "DeleteEvent":
-            n += `❌ `;
-            break;
-        case "WatchEvent":
-            n += `⭐️`;
-            break;
-        case "IssuesEvent":
-            n += `\u{1F4D3}`; //  `\u{1F4C3}`;// `🔖`;
-            break;
-        case "PullRequestEvent":
-            n += `⏪`;
-            break;
-        case "IssueCommentEvent":
-            n += `📝`;
-            break;
-        case "PullRequestReviewEvent":
-            n += `📝`;
-            break;
-        case "PullRequestReviewCommentEvent":
-            n += `\u{1F913}`; // `🖍`;
-            break;
-        case "CommitCommentEvent":
-            n += '💬';
-            break;
-        case "ReleaseEvent":
-            n += '📦';
-            break;
-        case "MemberEvent":
-            n += '🚼';
-            break;
-        case "GollumEvent":
-            n += `📜`;
-            break;
-    }
-    // n += " " + data.type.replace("Event", "");
-
-    return n;
-};
-
-var isProjectManagement = function (data) {
-    return !/^(Push|Create|Fork|Delete|Release)/igm.test(data.type);
-};
-
 var times = [];
 var eventIDs = [];
-var eventTypesPreferHidden = [];
-var colors = {
-    "actor": {
-        "whilei": "rgba(255,0,0,0.2)"
-    },
-    "repo": {
-        "ethereumclassic/go-ethereum": "rgba(0,255,0,0.2)"
-    }
-};
-
-var eventTypeIsPreferredHidden = function (eventType) {
-    return eventTypesPreferHidden.indexOf(eventType) > -1;
-};
 
 var loadEventTypePrefs = function () {
     var l = localStorage.getItem("badhub-eventtypeshidden");
@@ -411,6 +266,7 @@ var loadEventTypePrefs = function () {
     }
     eventTypesPreferHidden = JSON.parse(l);
 };
+
 var storeEventTypeHiddenPref = function (eventType) {
     var i = eventTypesPreferHidden.indexOf(eventType);
     if (i > -1) {
@@ -765,7 +621,11 @@ var doSnoop = function (query) {
     var deferreds = getResources(qs);
 
     $.when(...deferreds).then(function() {
-        buildCharts(eligibleData);
+        if ( $("#all-charts").hasClass("hidden") ) {
+            // nothing;
+        } else {
+            buildCharts();
+        }
     }, function(myfail) {
         console.log("failed", myfail);
     }).catch(function(err) {
@@ -814,9 +674,14 @@ var setupAuthorizedListeners = function () {
         });
     });
     $("#toggle-charts").on("click", function (e) {
+
         $("#all-charts").toggleClass("hidden");
         $("#response").toggleClass("hidden");
         $("#list-filter-palette").toggleClass("hidden");
+
+        if ( !$("#all-charts").hasClass("hidden") ) {
+            buildCharts();
+        }
     });
 };
 
@@ -829,7 +694,6 @@ var authorized = function () {
 
     setupAuthorizedListeners();
     loadEventTypePrefs();
-    initCharts();
 
     if (existingQ !== "" && existingQ !== null) {
         doSnoop(existingQ);
@@ -842,8 +706,8 @@ var getValueFromURLOrStored = function (lookKey) {
 
     const params = {};
     hashes.map(hash => {
-        const [key, val] = hash.split('=')
-        params[key] = decodeURIComponent(val)
+        const [key, val] = hash.split('=');
+        params[key] = decodeURIComponent(val);
     });
 
     if (params[lookKey]) {
@@ -856,7 +720,7 @@ var getValueFromURLOrStored = function (lookKey) {
 
 var valueOk = function (val) {
     return (typeof val !== "undefined") && (val !== null) && (val !== "");
-}
+};
 
 var reverseString = function (str) {
     var splitString = str.slice(1).split("");

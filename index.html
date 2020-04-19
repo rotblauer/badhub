@@ -85,6 +85,7 @@
         padding-left: 1.2em;
         padding-right: 1.2em;
         padding-top: 0.8em;
+        padding-bottom: 0.4em;
         border-bottom: none;
     }
 
@@ -170,7 +171,11 @@
         max-width: 60vw;
         overflow-x: scroll;
         cursor: pointer;
+        border: 2px solid transparent;
     }
+ div.issue-body:hover {
+     border: 2px solid black;
+ }
 
     .issue-body-expanded {
         max-height: 50vh !important;
@@ -180,6 +185,19 @@
  -webkit-box-shadow: -3px -1px 6px -3px rgba(0,0,0,0.75);
  -moz-box-shadow: -3px -1px 6px -3px rgba(0,0,0,0.75);
  box-shadow: -3px -1px 6px -3px rgba(0,0,0,0.75);
+ }
+ div.d3tooltip {
+     position: absolute;
+     text-align: left;
+     /* width: 120px; */
+     /* height: 3.6em; */
+     padding: 2px;
+     background: white;
+     border: 3px solid dodgerblue;
+     pointer-events: none;
+}
+ #all-charts {
+     max-width: 100%;
  }
 </style>
 <div id="main" style="display: none;">
@@ -205,8 +223,11 @@
         <div id="entities" style=""></div>
     </div>
 
-    <div id="dchart"></div>
     <div id="all-charts" class="hidden">
+        <div id="dchart3"></div>
+        <div id="dchart"></div>
+        <div id="dchart2"></div>
+        <div id="dchart4"></div>
         <pre id="debug"></pre>
 
         <!-- <div id="charts-holder-1" class="chart-holder " -->
@@ -230,7 +251,7 @@
 <div id="login">
     <h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/"
                  target="_">a github api token</a></h1>
-    <blockquote>this will only be stored in <code>localStorage</code></blockquote>
+    <p>this will only be stored in <code>localStorage</code></p>
     <p class="error" style="display: none;">you have to have one</p>
     <input id="input-apikey" type="text">
     <button id="input-enter-apikey">enter</button>
@@ -245,7 +266,10 @@
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="markdown-it.min.js"></script>
 <script src="moment.min.js"></script>
+
+<script src="utils.js"></script>
 <script src="charts2.js"></script>
+<script src="heatmap.js"></script>
 <script src="app.js"></script>
 </body>
 
