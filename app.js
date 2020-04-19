@@ -16,7 +16,7 @@ var actionColor = function (action) {
         case "published":
             return "green";
         case "merged":
-        return "#c31cff";
+            return "#c31cff";
     }
     return "#ddd";
 }
@@ -60,6 +60,7 @@ function invertColor(hex, bw) {
     // pad each with zeros and return
     return "#" + padZero(r) + padZero(g) + padZero(b);
 }
+
 
 var md = window.markdownit({linkify: true, breaks: true});
 
@@ -107,7 +108,10 @@ var formatPayload = function (eventType, data) {
 			<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong>
 			<strong>${data.payload.issue.title}</strong> (<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
       &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>
-			`;
+            `;
+            out += `<div class="issue-body">`;
+            out += md.render(data.payload.issue.body);
+            out += `</div>`;
             break;
         case "PullRequestEvent":
             var action = data.payload.action === "closed" && data.payload.pull_request.merged ? "merged" : data.payload.action;
@@ -116,20 +120,24 @@ var formatPayload = function (eventType, data) {
 			<strong style="color: ${actionColor(action)};">${action}</strong>&nbsp;
       <strong>${data.payload.pull_request.title}</strong>`;
 
-        for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
-            out += (function (l) {
-                return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
-            })(data.payload.pull_request.labels[j]);
-        }
+            for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
+                out += (function (l) {
+                    return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
+                })(data.payload.pull_request.labels[j]);
+            }
 
-        out+=`
+            out += `
 			(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.number}</a>)&nbsp;
       <span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
 
 			<p>
 			<span class="diff-stat"><span style="color: green;">+${data.payload.pull_request.additions}</span> / <span style="color: red;">-${data.payload.pull_request.deletions}</span> , <span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
 			<span style="color: gray; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
-			</p>`;
+            </p>`;
+
+            out += `<div class="issue-body">`;
+            out += md.render(data.payload.pull_request.body);
+            out += `</div>`;
 
             break;
 
@@ -140,26 +148,36 @@ var formatPayload = function (eventType, data) {
 <div class="comment-header">
 			<span style="color: #bbb">@</span> <strong>${data.payload.issue.title}</strong>`;
 
-        for (var j = 0; j < data.payload.issue.labels.length; j++) {
-            out += (function (l) {
-                return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
-            })(data.payload.issue.labels[j]);
-        }
+            for (var j = 0; j < data.payload.issue.labels.length; j++) {
+                out += (function (l) {
+                    return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
+                })(data.payload.issue.labels[j]);
+            }
 
-        out += `
+            out += `
 &nbsp;(<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
-      &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>
-</div>
+      &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>`;
+
+            out += `<div class="issue-body">`;
+            out += md.render(data.payload.issue.body);
+            out += `</div>`;
+
+            out += `
+</div>`;
+
+            out += `
 
 			<div class="payload-comment">
 
+<a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+
 ${md.render(data.payload.comment.body)}
-<p>
-			<a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_"><sup>link</sup></a></p>
 			</div>
 </div>
 			`;
             break;
+
+
         case "PullRequestReviewEvent":
             out = `<h1 style="color: yellow;">PullRequestReviewEvent NOT IMPLEMENTED</h1>`;
             break;
@@ -170,22 +188,24 @@ ${md.render(data.payload.comment.body)}
 <div class="comment-header">
 			<span style="color: #bbb">@</span> <strong>${data.payload.pull_request.title}</strong>`;
 
-        for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
-            out += (function (l) {
-                return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
-            })(data.payload.pull_request.labels[j]);
-        }
+            for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
+                out += (function (l) {
+                    return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
+                })(data.payload.pull_request.labels[j]);
+            }
 
-        out += `
+            out += `
 &nbsp;(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.pull_request.number}</a>)
 <span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
 			<br>
 			<span style="color: gray; display: block; font-size: 1em;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
 </div>
 
-			<div class="payload-comment">
+            <div class="payload-comment">
+            <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+
 			${data.payload.comment.body.length > 1400 ? data.payload.comment.body.substring(0, 1400) + " [...]" : data.payload.comment.body}
-			<a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_"><sup>link</sup></a>
+
 			</div>
 </div>
 			`;
@@ -198,7 +218,9 @@ ${md.render(data.payload.comment.body)}
 			<span style="color: #bbb">@</span> <a href="${data.payload.comment.html_url}" target="_">link</a>
 </div>
 
-			<div class="payload-comment">
+            <div class="payload-comment">
+            <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+
 			${data.payload.comment.body.length > 1400 ? data.payload.comment.body.substring(0, 1400) + "[...]" : data.payload.comment.body}
 			</div>
 </div>
@@ -244,7 +266,7 @@ var formatEventName = function (data) {
     var eventName = data.type;
     switch (eventName) {
         case "PushEvent":
-        n += `\u{1F535}`; // ` `; // `\u{1F535}`; //`⬆️`;
+            n += `\u{1F535}`; // ` `; // `\u{1F535}`; //`⬆️`;
             break;
         case "CreateEvent":
             n += `🔰`;
@@ -291,7 +313,7 @@ var formatEventName = function (data) {
     return n;
 };
 
-var isProjectManagement = function(data) {
+var isProjectManagement = function (data) {
     return !/^(Push|Create|Fork|Delete|Release)/igm.test(data.type);
 };
 
@@ -307,49 +329,10 @@ var colors = {
     }
 };
 
-// https://stackoverflow.com/a/1484507/4401322
-function random_color(format) {
-    var rint = Math.floor(0x100000000 * Math.random());
-    switch (format) {
-        case 'hex':
-            return '#' + ('00000' + rint.toString(16)).slice(-6).toUpperCase();
-        case 'hexa':
-            return '#' + ('0000000' + rint.toString(16)).slice(-8).toUpperCase();
-        case 'rgb':
-            return 'rgb(' + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ')';
-        case 'rgba':
-            return 'rgba(' + (rint & 255) + ',' + (rint >> 8 & 255) + ',' + (rint >> 16 & 255) + ', 0.1)'; //  + (rint >> 24 & 255)/255 + ')'
-        default:
-            return rint;
-    }
-}
-
-// this was a try to see if color associations were visually helpful at all. maybe not so much.
-var getOrSaveNewColor = function (category, k) {
-    return "rgba(0,0,0,0)"; // abort
-    if (!colors.hasOwnProperty(category) || !colors[category].hasOwnProperty(k)) {
-        c = random_color("rgba");
-        saveNewColor(category, k, c);
-        return c;
-    }
-    return colors[category][k];
-}
-var saveNewColor = function (category, k, v) {
-    colors[category] = colors[category] || {};
-    colors[category][k] = v;
-    localStorage.setItem("badhub-colors", JSON.stringify(colors));
-}
-var loadColors = function () {
-    var l = localStorage.getItem("badhub-colors");
-    if (l === null || l === "") {
-        return;
-    }
-    colors = JSON.parse(l);
-};
-
 var eventTypeIsPreferredHidden = function (eventType) {
     return eventTypesPreferHidden.indexOf(eventType) > -1;
 };
+
 var loadEventTypePrefs = function () {
     var l = localStorage.getItem("badhub-eventtypeshidden");
     if (l === null || l === "") {
@@ -385,7 +368,7 @@ var insertTimesYieldsI = function (t) {
     return times.length - 1;
 };
 
-var eventRowBG = function(data) {
+var eventRowBG = function (data) {
     if (data.type == "DeleteEvent") {
         return "#ffebeb";
     }
@@ -396,30 +379,33 @@ var eventRowBG = function(data) {
     if (!data.payload.action) {
         return "none";
     }
-    var action = data.payload.action === "closed" && data.payload.pull_request.merged ? "merged" : data.payload.action;
+    var action = data.payload.action === "closed" && data.payload.pull_request && data.payload.pull_request.merged ? "merged" : data.payload.action;
     switch (action) {
-    case "created":
-        if (/Comment/igm.test(data.type)) {
-            return "#fffdeb";
-        }
-        return "#f4fff4";
-    case "opened":
-        return "#f4fff4";
-    case "reopened":
-        return "#f4fffa";
-    case "edited":
-        return "#fff0e9";
-    case "closed":
-        return "#fff1f1";
-    case "published":
-        return "#edfbff";
-    case "merged":
-        return "#f3e9ff";
+        case "created":
+            if (/Comment/igm.test(data.type)) {
+                return "#fffdeb";
+            }
+            return "#f4fff4";
+        case "opened":
+            return "#f4fff4";
+        case "reopened":
+            return "#f4fffa";
+        case "edited":
+            return "#fff0e9";
+        case "closed":
+            return "#fff1f1";
+        case "published":
+            return "#edfbff";
+        case "merged":
+            return "#f3e9ff";
     }
     return "none";
 };
 
 var buildRow = function (d) {
+    if (!valueOk(d)) {
+        return;
+    }
     var bg = eventRowBG(d);
     var tdbg = "";
     if (bg !== "none" && bg !== "") {
@@ -433,7 +419,7 @@ var buildRow = function (d) {
 	<td style="">
 		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
 	</td>
-	<td style="text-align: right; padding-right: 5px; border-right: 6px solid ${getOrSaveNewColor("actor", d.actor.login)}; ">
+	<td style="text-align: right; padding-right: 5px;">
 		<a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
 	</td>
 	<td style=" ${tdbg} text-align: center;">
@@ -556,7 +542,7 @@ var snoopOK = function (data, textStatus, request) {
             }
 
             if (isAutomatedPushEvent(d)) {
-            	return;
+                return;
             }
 
             // add uniq event type for filtering
@@ -609,9 +595,9 @@ var snoopOK = function (data, textStatus, request) {
             var j = insertTimesYieldsI(d.created_at);
             var row = buildRow(d);
             if (j === 0) {
-                $(`#tabledata`).prepend(row)
+                $(`#tabledata`).prepend(row);
             } else {
-                $(`#tabledata > tr:nth-child(${j})`).after(buildRow(d))
+                $(`#tabledata > tr:nth-child(${j})`).after(buildRow(d));
             }
         })(data[i])
     }
@@ -729,6 +715,11 @@ var authorized = function () {
     if (existingQ !== "" && existingQ !== null) {
         doSnoop(existingQ);
     }
+
+    $(".issue-body").on("click", function () {
+        console.log("issue body clicked");
+        $(this).toggleClass("issue-body-expanded");
+    });
 };
 
 var getValueFromURLOrStored = function (lookKey) {

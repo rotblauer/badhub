@@ -5,209 +5,220 @@
 </head>
 
 <body class="">
-    <style>
-        .details {
-            display: none;
-        }
+<style>
+    .details {
+        display: none;
+    }
 
-        body {
-            font-family: monospace, monospace;
-        }
+    body {
+        font-family: monospace, monospace;
+    }
 
-        table {
-            background-color: #f6f8fa;
-        }
+    table {
+        background-color: #f6f8fa;
+    }
 
-        td {
-            vertical-align: top !important;
-            overflow-wrap: break-word;
-            padding: 0.5em;
-        }
+    td {
+        vertical-align: top !important;
+        overflow-wrap: break-word;
+        padding: 0.5em;
+    }
 
-        td.apayload {
-            padding-bottom: 0.5em;
-        }
+    td.apayload {
+        padding-bottom: 0.5em;
+    }
 
-        .bold {
-            font-weight: bold;
-        }
+    .bold {
+        font-weight: bold;
+    }
 
-      pre {
-          background-color: rgba(223, 239, 255, 0.15);
-          color: #000;
-          padding: 3.2em;
-          line-height: 1.6em;
-          max-height: 400px;
-          overflow-y: scroll;
-        }
+    pre {
+        background-color: rgba(223, 239, 255, 0.15);
+        color: #000;
+        padding: 3.2em;
+        line-height: 1.6em;
+        max-height: 400px;
+        overflow-y: scroll;
+    }
 
-        code {
-            white-space: pre-wrap;
-            overflow: normal;
-        }
+    code {
+        white-space: pre-wrap;
+        overflow: inherit;
+    }
 
-        .hidden {
-            display: none !important;
-        }
+    .hidden {
+        display: none !important;
+    }
 
-        body.darktheme {
-            background-color: #270000;
-            color: white;
-        }
+    body.darktheme {
+        background-color: #270000;
+        color: white;
+    }
 
-        body.darktheme a {
-            color: lightblue;
-        }
+    body.darktheme a {
+        color: lightblue;
+    }
 
-        body.darktheme a.commit {
-            color: #eee;
-        }
-     blockquote {
-         background-color: #fbfbfb;
-         padding: 0.01em;
-         border-left: 0.4em solid #ffaf5a 
-         padding-left: 1.2em;
-     }
+    body.darktheme a.commit {
+        color: #eee;
+    }
 
-     /* blockquote { */
-     /* font-family: sans-serif; */
-     /* background-color: white; */
-     /* padding: 0.7em 0.7em 0.7em 1.4em; */
-     /* border-radius: 0em 0.5em 0.5em 0.5em; */
-     /* border: 1px solid #9aa8b5; */
-     /* color: #333; */
-     /* } */
+    blockquote {
+        background-color: #fbfbfb;
+        padding: 0.01em;
+        border-left: 0.4em solid #ffaf5a;
+        padding-left: 1.2em;
+    }
 
-     .comment-header {
-         padding-left: 1.2em;
-         padding-right: 1.2em;
-         padding-top: 0.8em;
-         border-bottom: none;
-     }
-     .comment-issue-pr-payload {
-         border: 2px solid white;
-         border-radius: 0 0 0.4em 0.4em;
-     }
+    .comment-header {
+        padding-left: 1.2em;
+        padding-right: 1.2em;
+        padding-top: 0.8em;
+        border-bottom: none;
+    }
 
-     .payload-comment {
-         font-family: sans-serif;
-         background-color: white;
-         padding: 0.7em 0.7em 0.1em 1.4em;
-         color: #333;
-         margin-top: 1em;
-         /* max-width: 60%; */
-         max-height: 20vh;
+    .comment-issue-pr-payload {
+        border: 2px solid white;
+        border-radius: 0 0 0.4em 0.4em;
+    }
 
-overflow-y: scroll;
-     }
-     .payload-comment img {
+    .payload-comment {
+        font-family: sans-serif;
+        background-color: white;
+        padding: 0.7em 0.7em 0.1em 1.4em;
+        color: #333;
+        margin-top: 1em;
+        /* max-width: 60%; */
+        max-height: 20vh;
+
+        overflow-y: scroll;
+    }
+
+    .payload-comment img {
         max-width: 100%;
-         max-height: 33vh;
-     }
+        max-height: 33vh;
+    }
 
-        span.diff-stat {
-            font-size: 0.8em;
-            background-color: white;
-            padding: 0.3em 0.5em 0.3em 0.4em;
-            border-radius: 0.3em;
-            border: 1px solid black;
-        }
+    span.diff-stat {
+        font-size: 0.8em;
+        background-color: white;
+        padding: 0.3em 0.5em 0.3em 0.4em;
+        border-radius: 0.3em;
+        border: 1px solid black;
+    }
 
-        .commits {
-            background-color: #333333;
-            color: whitesmoke;
-            font-size: 1.2em;
-            padding: 0.5em 0 0.5em 1em;
-            border-radius: 0 0 0.3em 0.3em;
-            /* max-width: 60%; */
-        }
-        code.commit-branch {
-            color: lime;
-        }
-        code.commit-author {
-            color: gray;
-        }
-        code.commit-message {
-        }
-        span.pr-user-login {
-            color:#587197;
-            float: right;
-            border-radius: 0.3em;
-        }
-     tr.event-row {
-         margin-top: 1em;
-     }
-     a.quote-comment-link {
-         float: right;
-     }
-     tr.eventIssuesEvent > td.apayload {
-         background: white;
-         line-height: 2;
-         padding-left: 1em;
-         padding-right: 1em;
-         border-radius: 0.5em 0.5em 0em 0em;
-     }
-    </style>
-    <div id="main" style="display: none;">
-        <small class="instructions" style="color:green;"><strong>example:</strong>
-            <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
-        <input type="text" id="input-query" style="width: 90vw;">
-        <button id="input-enter-query">snoop</button>
-        <p>
-            <span id="showdetails"><i>show details</i></span>&nbsp; |&nbsp;
-            <span id="toggle-darktheme"><i>toggle dark theme</i></span> |&nbsp;
-            <span id="toggle-charts"><i>toggle charts</i></span>
-        </p>
+    .commits {
+        background-color: #333333;
+        color: whitesmoke;
+        font-size: 1.2em;
+        padding: 0.5em 0 0.5em 1em;
+        border-radius: 0 0 0.3em 0.3em;
+        /* max-width: 60%; */
+    }
 
+    code.commit-branch {
+        color: lime;
+    }
 
-        <div style="position: fixed; bottom: 0; right: 0; max-height: 50vh; overflow-y: scroll; background: white; padding: 1em; border: 6px solid rgb(235, 243, 251);">
-            <a id="eventTypes-toggleall" style="color: black;"><i>&lt;Toggle all events</i>&gt;</a>
-            <br>
-            <!-- <br> toggle events: -->
-            <div id="eventTypes"></div>
-            <hr>
-            <a id="entities-toggleall" style="color: black;"><i>&lt;Toggle all entities</i>&gt;</a>
-            <br>
-            <!-- <br> toggle entities: -->
-            <div id="entities" style=""></div>
-        </div>
+    code.commit-author {
+        color: gray;
+    }
 
-        <div id="charts-holder-1" class="chart-holder hidden"
-            style="display: inline-block;position: relative; width: 80vw;">
-            <canvas id="chart-eventType-user" class="chart"></canvas>
-        </div>
-        <div id="charts-holder-3" class="chart-holder hidden"
-            style="display: inline-block;position: relative; width: 80vw;">
-            <canvas id="chart-user-eventType" class="chart"></canvas>
-        </div>
-        <div id="charts-holder-2" class="chart-holder hidden"
-            style="display: inline-block; position: relative; width: 80vw;">
-            <canvas id="chart-eventType-repo" class="chart"></canvas>
-        </div>
+    code.commit-message {
+    }
+
+    span.pr-user-login {
+        color: #587197;
+        float: right;
+        border-radius: 0.3em;
+    }
+
+    tr.event-row {
+        margin-top: 1em;
+    }
+
+    a.quote-comment-link {
+        float: right;
+    }
+
+    tr.eventIssuesEvent > td.apayload {
+        background: white;
+        line-height: 2;
+        padding-left: 1em;
+        padding-right: 1em;
+        border-radius: 0.5em 0.5em 0em 0em;
+    }
+
+    .issue-body {
+        color: darkgray;
+        max-height: 3.2em;
+        overflow-y: hidden;
+    }
+
+    .issue-body-expanded {
+        max-height: 50vh !important;
+        overflow-y: scroll;
+    }
+</style>
+<div id="main" style="display: none;">
+    <small class="instructions" style="color:green;"><strong>example:</strong>
+        <i>users/whilei,orgs/ethereumclassic,repos/ethereum/go-ethereum,networks/ethereumclassic/go-ethereum</i></small>
+    <input type="text" id="input-query" style="width: 90vw;">
+    <button id="input-enter-query">snoop</button>
+    <p>
+        <span id="showdetails"><i>show details</i></span>&nbsp; |&nbsp;
+        <span id="toggle-darktheme"><i>toggle dark theme</i></span> |&nbsp;
+        <span id="toggle-charts"><i>toggle charts</i></span>
+    </p>
 
 
-
-        <div id="response"></div>
+    <div style="position: fixed; bottom: 0; right: 0; max-height: 50vh; overflow-y: scroll; background: white; padding: 1em; border: 6px solid rgb(235, 243, 251);">
+        <a id="eventTypes-toggleall" style="color: black;"><i>&lt;Toggle all events</i>&gt;</a>
+        <br>
+        <!-- <br> toggle events: -->
+        <div id="eventTypes"></div>
+        <hr>
+        <a id="entities-toggleall" style="color: black;"><i>&lt;Toggle all entities</i>&gt;</a>
+        <br>
+        <!-- <br> toggle entities: -->
+        <div id="entities" style=""></div>
     </div>
 
-    <div id="login">
-        <h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/"
-                target="_">a github api token</a></h1>
-        <blockquote>this will only be stored in <code>localStorage</code></blockquote>
-        <p class="error" style="display: none;">you have to have one</p>
-        <input id="input-apikey" type="text">
-        <button id="input-enter-apikey">enter</button>
+    <div id="charts-holder-1" class="chart-holder hidden"
+         style="display: inline-block;position: relative; width: 80vw;">
+        <canvas id="chart-eventType-user" class="chart"></canvas>
+    </div>
+    <div id="charts-holder-3" class="chart-holder hidden"
+         style="display: inline-block;position: relative; width: 80vw;">
+        <canvas id="chart-user-eventType" class="chart"></canvas>
+    </div>
+    <div id="charts-holder-2" class="chart-holder hidden"
+         style="display: inline-block; position: relative; width: 80vw;">
+        <canvas id="chart-eventType-repo" class="chart"></canvas>
     </div>
 
-    <!-- scripts -->
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+
+    <div id="response"></div>
+</div>
+
+<div id="login">
+    <h1>enter <a href="https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/"
+                 target="_">a github api token</a></h1>
+    <blockquote>this will only be stored in <code>localStorage</code></blockquote>
+    <p class="error" style="display: none;">you have to have one</p>
+    <input id="input-apikey" type="text">
+    <button id="input-enter-apikey">enter</button>
+</div>
+
+<!-- scripts -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
-    <script src="markdown-it.min.js"></script>
-    <script src="moment.min.js"></script>
-    <script src="mycharts.js"></script>
-    <script src="app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+<script src="markdown-it.min.js"></script>
+<script src="moment.min.js"></script>
+<script src="mycharts.js"></script>
+<script src="app.js"></script>
 </body>
 
 </html>
