@@ -92,10 +92,13 @@
      .payload-comment {
          font-family: sans-serif;
          background-color: white;
-         padding: 0.7em 0.7em 0.7em 1.4em;
+         padding: 0.7em 0.7em 0.1em 1.4em;
          color: #333;
          margin-top: 1em;
          /* max-width: 60%; */
+         max-height: 20vh;
+
+overflow-y: scroll;
      }
      .payload-comment img {
         max-width: 100%;
@@ -157,15 +160,15 @@
         </p>
 
 
-        <div style="position: fixed; top: 50; right: 0; height: 80vh; overflow-y: scroll; ">
-            <a id="eventTypes-toggleall"><i>toggle all events</i></a>
+        <div style="position: fixed; bottom: 0; right: 0; max-height: 50vh; overflow-y: scroll; background: white; padding: 1em; border: 6px solid rgb(235, 243, 251);">
+            <a id="eventTypes-toggleall" style="color: black;"><i>&lt;Toggle all events</i>&gt;</a>
             <br>
-            <br> toggle events:
+            <!-- <br> toggle events: -->
             <div id="eventTypes"></div>
             <hr>
-            <a id="entities-toggleall"><i>toggle all entities</i></a>
+            <a id="entities-toggleall" style="color: black;"><i>&lt;Toggle all entities</i>&gt;</a>
             <br>
-            <br> toggle entities:
+            <!-- <br> toggle entities: -->
             <div id="entities" style=""></div>
         </div>
 

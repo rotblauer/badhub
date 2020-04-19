@@ -244,7 +244,7 @@ var formatEventName = function (data) {
     var eventName = data.type;
     switch (eventName) {
         case "PushEvent":
-        n += ` `; // `\u{1F535}`; //`⬆️`;
+        n += `\u{1F535}`; // ` `; // `\u{1F535}`; //`⬆️`;
             break;
         case "CreateEvent":
             n += `🔰`;
@@ -390,7 +390,7 @@ var eventRowBG = function(data) {
         return "#ffebeb";
     }
     if (data.payload.push_id) {
-        return "none";
+        return "#dfedff80";
         // return "#edffff";
     }
     if (!data.payload.action) {
@@ -399,6 +399,9 @@ var eventRowBG = function(data) {
     var action = data.payload.action === "closed" && data.payload.pull_request.merged ? "merged" : data.payload.action;
     switch (action) {
     case "created":
+        if (/Comment/igm.test(data.type)) {
+            return "#fffdeb";
+        }
         return "#f4fff4";
     case "opened":
         return "#f4fff4";
@@ -424,9 +427,6 @@ var buildRow = function (d) {
     }
     return $(`
 	<tr class="event-row event${d.type} entity${d.actor.login} ${eventTypeIsPreferredHidden(d.type) ? 'hidden' : ''}" >
-	<td style="color: #ccc;">
-		${minimalTimeDisplay(moment(d.created_at))}
-	</td>
 	<td class="avatar" style="">
 		<img src="${d.actor.avatar_url}" style="max-height: 2em;" />
 	</td>
@@ -436,17 +436,20 @@ var buildRow = function (d) {
 	<td style="text-align: right; padding-right: 5px; border-right: 6px solid ${getOrSaveNewColor("actor", d.actor.login)}; ">
 		<a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
 	</td>
-	<td style=" ${tdbg}">
+	<td style=" ${tdbg} text-align: center;">
 		<span>
 		${formatEventName(d)}
-		<span style="color: #bbb"><sup>${d.type === "PushEvent" ? d.payload.commits.length : ""}</sup></span>
+		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length : ""}</span>
 		</span>
-	</td>
+    </td>
 
-  <!-- style="${isProjectManagement(d) ? 'text-align: right;' : ''}" -->
 	<td class="apayload" >
 		${formatPayload(d.type, d)}
-	</td>
+    </td>
+    
+    <td style="color: #ccc;">
+    ${minimalTimeDisplay(moment(d.created_at))}
+    </td>
 
 	<td class="details" style="font-size: 0.8em; ">
 		<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>
@@ -522,13 +525,13 @@ var snoopOK = function (data, textStatus, request) {
 					<table>
 						<thead>
 						<tr>
-							<th>date</th>
 							<th>\u{1F431}</th>
 							<th style="text-align: left;">entity</th>
 							<th style="text-align: right;">location</th>
-							<th></th>
+                            <th></th>
 							<th style="text-align: left;">event</th>
-							<!-- <th>info</th> -->
+                            <!-- <th>info</th> -->
+                            <th></th>
 							<th class="details">payload</th>
 						</tr>
 						</thead>
