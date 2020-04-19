@@ -2,6 +2,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/default.min.css">
 </head>
 
 <body class="">
@@ -39,14 +41,14 @@
         font-weight: bold;
     }
 
-    pre {
-        background-color: rgba(223, 239, 255, 0.15);
-        color: #000;
-        padding: 3.2em;
-        line-height: 1.6em;
-        max-height: 400px;
-        overflow-y: scroll;
-    }
+ /* pre { */
+ /* background-color: rgba(223, 239, 255, 0.15); */
+ /* color: #000; */
+ /* padding: 3.2em; */
+ /* line-height: 1.6em; */
+ /* max-height: 400px; */
+ /* overflow-y: scroll; */
+ /* } */
 
     code {
         white-space: pre-wrap;
@@ -69,6 +71,8 @@
     body.darktheme a.commit {
         color: #eee;
     }
+ code {
+ }
 
     blockquote {
         background-color: #fbfbfb;
@@ -201,13 +205,10 @@
         <div id="entities" style=""></div>
     </div>
 
+    <div id="dchart"></div>
     <div id="all-charts" class="hidden">
-        <div class="heatmap">
+        <pre id="debug"></pre>
 
-            <pre id="debug">
-
-            </pre>
-        </div>
         <!-- <div id="charts-holder-1" class="chart-holder " -->
         <!-- style="display: inline-block;position: relative; width: 80vw;"> -->
         <!-- <canvas id="chart-eventType-user" class="chart"></canvas> -->
@@ -239,7 +240,9 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/URI.js/1.19.1/URI.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script> -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
 <script src="markdown-it.min.js"></script>
 <script src="moment.min.js"></script>
 <script src="charts2.js"></script>

@@ -2,6 +2,7 @@ var apikey = "";
 var pageLimit = 2; // 30 events per page // TODO FIXME add a user-configurable feature here
 
 var eligibleData = [];
+var eligibleActors = [];
 
 var actionColor = function (action) {
     switch (action) {
@@ -21,12 +22,13 @@ var actionColor = function (action) {
             return "#c31cff";
     }
     return "#ddd";
-}
+};
+
 
 // accepts _moment()_ time
 var minimalTimeDisplay = function (time) {
     return time.fromNow(true).replace("a few seconds", "0m").replace("a ", "1").replace("an", "1").replace("hours", "h").replace("hour", "h").replace("minutes", "m").replace("minute", "m").replace(" ", "").replace("days", "d").replace("day", "d").replace("months", "M").replace("month", "M");
-}
+};
 
 // https://stackoverflow.com/a/35970186/4401322
 function padZero(str, len) {
@@ -64,7 +66,18 @@ function invertColor(hex, bw) {
 }
 
 
-var md = window.markdownit({linkify: true, breaks: true});
+var md = window.markdownit({
+    linkify: true,
+    breaks: true,
+    highlight: function (str, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                return hljs.highlight(lang, str).value;
+            } catch (__) {}
+        }
+        return ''; // use external default escaping
+    }
+   });
 
 var formatPayload = function (eventType, data) {
     var out = "";
@@ -462,45 +475,71 @@ var eventRowBG = function (data) {
 
 var buildRow = function (d) {
     if (!valueOk(d)) {
-        return;
+        return false;
     }
     var bg = eventRowBG(d);
     var tdbg = "";
     if (bg !== "none" && bg !== "") {
         tdbg = `background-color: ${bg};`;
     }
-    return $(`
-	<tr class="event-row event${d.type} entity${d.actor.login} ${eventTypeIsPreferredHidden(d.type) ? 'hidden' : ''}" >
-	<td class="avatar" style="">
+    var $tr = $(`<tr></tr>`);
+    $tr.addClass("event-row").addClass(`even${d.type}`).addClass(`entity${d.actor.login}`);
+    if (eventTypeIsPreferredHidden(d.type)) {
+        $tr.addClass("hidden");
+    }
+    var $avatar = $(`
+<td class="avatar" style="">
 		<img src="${d.actor.avatar_url}" style="max-height: 2em;" />
-	</td>
-	<td style="">
+</td>
+`);
+    var $actor = $(`
+<td style="">
 		<a href="https://github.com/${d.actor.login}" target="_">${d.actor.login}</a>
-	</td>
-	<td style="text-align: right; padding-right: 5px;">
-		<a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
-	</td>
-	<td style=" ${tdbg} text-align: center;">
-		<span>
-		${formatEventName(d)}
-		<span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length : ""}</span>
-		</span>
-    </td>
+</td>
+`);
+    var $repo = $(`
+<td style="text-align: right; padding-right: 5px;">
+    <a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
+</td>
+`);
+    var $fmt =$(`
+<td style=" ${tdbg} text-align: center;">
+    <span>
+    ${formatEventName(d)}
+    <span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length : ""}</span>
+    </span>
+</td>
+`);
 
-	<td class="apayload" >
-		${formatPayload(d.type, d)}
-    </td>
+    var $payload = $(`
+<td class="apayload" >
+    ${formatPayload(d.type, d)}
+</td>
+`);
 
-    <td style="color: #ccc;">
+    var $time = $(`
+<td style="color: #ccc;">
     ${minimalTimeDisplay(moment(d.created_at))}
-    </td>
+</td>
+`);
 
-	<td class="details" style="font-size: 0.8em; ">
-		<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>
-	</td>
-	</tr>
-	`);
-}
+    var $details = $(`
+<td class="details" style="font-size: 0.8em;">
+</td>
+`);
+    var $deets = $(`
+        <code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>
+`);
+    $details.append($deets);
+    $tr.append($avatar);
+    $tr.append($actor);
+    $tr.append($repo);
+    $tr.append($fmt);
+    $tr.append($payload);
+    $tr.append($time);
+    $tr.append($details);
+    return $tr;
+};
 
 function convertMS(milliseconds) {
     var day, hour, minute, seconds;
@@ -588,6 +627,9 @@ var snoopOK = function (data, textStatus, request) {
 
     // localStorage.setItem("data", JSON.stringify(data));
     for (var i = 0; i < data.length; i++) {
+        if (typeof data[i] == "undefined" || data[i] === null) {
+            continue;
+        }
         (function (d) {
 
             // already have this event from some other entity
@@ -650,8 +692,21 @@ var snoopOK = function (data, textStatus, request) {
 
             var j = insertTimesYieldsI(d.created_at);
             var row = buildRow(d);
+            if (row === false) {
+                console.log("row was false");
+                return;
+            }
+            if (typeof row === "undefined") {
+                console.log("row was undefined");
+                return;
+            }
+            if (row === null) {
+                console.log("row was null");
+                return;
+            }
             row.find(".issue-body").on("click", function () {
                 console.log("issue body clicked");
+                if (typeof $(this) === "undefined" ||  $(this) === null) { return; }
                 $(this).toggleClass("issue-body-expanded");
             });
             if (j === 0) {
@@ -661,7 +716,7 @@ var snoopOK = function (data, textStatus, request) {
             }
         })(data[i]);
     }
-    buildCharts(eligibleData);
+    return true;
 };
 
 var snoopNOTOK = function (err) {
@@ -670,7 +725,7 @@ var snoopNOTOK = function (err) {
 };
 
 var queryEntity = function (q) {
-    $.ajax({
+     return $.ajax({
         url: `https://api.github.com/${q.resource}/events?access_token=${q.apikey}&page=${q.page}`,
         dataType: 'json',
         type: "GET",
@@ -678,6 +733,18 @@ var queryEntity = function (q) {
         success: snoopOK,
         error: snoopNOTOK,
     });
+};
+
+var getResources = function(qs) {
+    var deferreds = [];
+    for (var i = 0; i < qs.length; i++) {
+        for (var page = 1; page <= pageLimit; page++) {
+            var prom = (queryEntity)({resource: qs[i], page: page, apikey: apikey});
+            deferreds.push(prom);
+        }
+    }
+    console.log("deferreds len", deferreds.length);
+    return deferreds;
 };
 
 var doSnoop = function (query) {
@@ -694,12 +761,16 @@ var doSnoop = function (query) {
             qs = [query];
         }
     }
-    for (var i = 0; i < qs.length; i++) {
-        for (var page = 1; page <= pageLimit; page++) {
-            queryEntity({resource: qs[i], page: page, apikey: apikey});
-        }
-    }
 
+    var deferreds = getResources(qs);
+
+    $.when(...deferreds).then(function() {
+        buildCharts(eligibleData);
+    }, function(myfail) {
+        console.log("failed", myfail);
+    }).catch(function(err) {
+        console.log("was error", err);
+    });
 };
 
 var setupLoginListeners = function () {
@@ -794,12 +865,15 @@ var reverseString = function (str) {
 };
 
 var setupView = function() {
+
     var pref = getValueFromURLOrStored("view");
     if (!valueOk(pref)) { return; } // no preference, use coded defaults
+
     if (pref === "charts") {
         $("#response").addClass("hidden");
         $("#list-filter-palette").addClass("hidden");
         $("#all-charts").removeClass("hidden");
+
     } else if (pref === "list") {
         $("#response").removeClass("hidden");
         $("#list-filter-palette").removeClass("hidden");
