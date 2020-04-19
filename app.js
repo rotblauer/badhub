@@ -1,6 +1,8 @@
 var apikey = "";
 var pageLimit = 2; // 30 events per page // TODO FIXME add a user-configurable feature here
 
+var eligibleData = [];
+
 var actionColor = function (action) {
     switch (action) {
         case "created":
@@ -642,12 +644,9 @@ var snoopOK = function (data, textStatus, request) {
                             })
                     );
             }
-                     eventIDs.push(d.id);
 
-
-            addEventTypeUserData(d);
-            addEventTypeRepoData(d);
-            addUserEventTypeData(d);
+            eventIDs.push(d.id);
+            eligibleData.push(d);
 
             var j = insertTimesYieldsI(d.created_at);
             var row = buildRow(d);
@@ -662,11 +661,13 @@ var snoopOK = function (data, textStatus, request) {
             }
         })(data[i]);
     }
+    buildCharts(eligibleData);
 };
+
 var snoopNOTOK = function (err) {
     console.error(err);
     $(".instructions").show();
-}
+};
 
 var queryEntity = function (q) {
     $.ajax({
@@ -695,9 +696,10 @@ var doSnoop = function (query) {
     }
     for (var i = 0; i < qs.length; i++) {
         for (var page = 1; page <= pageLimit; page++) {
-            (queryEntity)({resource: qs[i], page: page, apikey: apikey})
+            queryEntity({resource: qs[i], page: page, apikey: apikey});
         }
     }
+
 };
 
 var setupLoginListeners = function () {
@@ -756,7 +758,7 @@ var authorized = function () {
 
     setupAuthorizedListeners();
     loadEventTypePrefs();
-    setupCharts();
+    initCharts();
 
     if (existingQ !== "" && existingQ !== null) {
         doSnoop(existingQ);
@@ -807,6 +809,7 @@ var setupView = function() {
 
 $(function () {
     setupLoginListeners();
+    setupView();
 
     var key = getValueFromURLOrStored("bhak");
     if (valueOk(key)) {

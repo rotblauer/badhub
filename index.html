@@ -172,6 +172,11 @@
         max-height: 50vh !important;
         overflow-y: scroll;
     }
+ #list-filter-palette {
+ -webkit-box-shadow: -3px -1px 6px -3px rgba(0,0,0,0.75);
+ -moz-box-shadow: -3px -1px 6px -3px rgba(0,0,0,0.75);
+ box-shadow: -3px -1px 6px -3px rgba(0,0,0,0.75);
+ }
 </style>
 <div id="main" style="display: none;">
     <small class="instructions" style="color:green;"><strong>example:</strong>
@@ -197,18 +202,24 @@
     </div>
 
     <div id="all-charts" class="hidden">
-    <div id="charts-holder-1" class="chart-holder "
-         style="display: inline-block;position: relative; width: 80vw;">
-        <canvas id="chart-eventType-user" class="chart"></canvas>
-    </div>
-    <div id="charts-holder-3" class="chart-holder "
-         style="display: inline-block;position: relative; width: 80vw;">
-        <canvas id="chart-user-eventType" class="chart"></canvas>
-    </div>
-    <div id="charts-holder-2" class="chart-holder "
-         style="display: inline-block; position: relative; width: 80vw;">
-        <canvas id="chart-eventType-repo" class="chart"></canvas>
-    </div>
+        <div class="heatmap">
+
+            <pre id="debug">
+
+            </pre>
+        </div>
+        <!-- <div id="charts-holder-1" class="chart-holder " -->
+        <!-- style="display: inline-block;position: relative; width: 80vw;"> -->
+        <!-- <canvas id="chart-eventType-user" class="chart"></canvas> -->
+        <!-- </div> -->
+        <!-- <div id="charts-holder-3" class="chart-holder " -->
+        <!-- style="display: inline-block;position: relative; width: 80vw;"> -->
+        <!-- <canvas id="chart-user-eventType" class="chart"></canvas> -->
+        <!-- </div> -->
+        <!-- <div id="charts-holder-2" class="chart-holder " -->
+        <!-- style="display: inline-block; position: relative; width: 80vw;"> -->
+        <!-- <canvas id="chart-eventType-repo" class="chart"></canvas> -->
+        <!-- </div> -->
     </div>
 
 
@@ -231,7 +242,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
 <script src="markdown-it.min.js"></script>
 <script src="moment.min.js"></script>
-<script src="mycharts.js"></script>
+<script src="charts2.js"></script>
 <script src="app.js"></script>
 </body>
 
