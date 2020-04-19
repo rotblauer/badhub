@@ -441,7 +441,7 @@ var buildRow = function (d) {
 		<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>
 	</td>
 	</tr>
-	`) || true;
+	`);
 }
 
 function convertMS(milliseconds) {
@@ -594,10 +594,14 @@ var snoopOK = function (data, textStatus, request) {
 
             var j = insertTimesYieldsI(d.created_at);
             var row = buildRow(d);
+            row.find(".issue-body").on("click", function () {
+                console.log("issue body clicked");
+                $(this).toggleClass("issue-body-expanded");
+            });
             if (j === 0) {
                 $(`#tabledata`).prepend(row);
             } else {
-                $(`#tabledata > tr:nth-child(${j})`).after(buildRow(d));
+                $(`#tabledata > tr:nth-child(${j})`).after(row);
             }
         })(data[i])
     }
@@ -715,11 +719,6 @@ var authorized = function () {
     if (existingQ !== "" && existingQ !== null) {
         doSnoop(existingQ);
     }
-
-    $(".issue-body").on("click", function () {
-        console.log("issue body clicked");
-        $(this).toggleClass("issue-body-expanded");
-    });
 };
 
 var getValueFromURLOrStored = function (lookKey) {
