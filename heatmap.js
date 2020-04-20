@@ -229,7 +229,7 @@ var buildHeatmap = function (params) {
             }
             tooltipDiv.transition()
                 .duration(200)
-                .style("opacity", 0.9);
+                .style("opacity", 1);
             tooltipDiv.html("<strong>" + d.value + "</strong>&nbsp;(" + d.range + " @ " + d.domain + ")")
                 .style("left", (d3.event.pageX + 10) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
@@ -372,7 +372,7 @@ var buildHeatmap = function (params) {
                         d3.select(this).style("color", "dodgerblue");
                         tooltipDiv.transition()
                             .duration(200)
-                            .style("opacity", 0.9);
+                            .style("opacity", 1);
                         tooltipDiv.html("<strong>" + "github.com/" + d + "</strong>")
                             .style("left", (d3.event.pageX + 10) + "px")
                             .style("top", (d3.event.pageY - 28) + "px");
@@ -395,7 +395,7 @@ var buildHeatmap = function (params) {
             }
             tooltipDiv.transition()
                 .duration(200)
-                .style("opacity", 0.9);
+                .style("opacity", 1);
             tooltipDiv.html("<strong>" + d.value + "</strong>&nbsp;(" + d.range + " @ " + d.domain + ")")
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");

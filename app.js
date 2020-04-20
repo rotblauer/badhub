@@ -65,7 +65,8 @@ var formatPayload = function (eventType, data) {
       &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>
 			&nbsp;<strong style="color: ${actionColor(data.payload.action)};">${data.payload.action}</strong>
 </div>
-			<strong>${data.payload.issue.title}</strong> (<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
+			<strong>${data.payload.issue.title}</strong>
+			(<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
 </div>
             `;
             out += `<div class="issue-body">`;
@@ -83,9 +84,9 @@ var formatPayload = function (eventType, data) {
       &nbsp;<span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
 			&nbsp;<strong style="color: ${actionColor(action)};">${action}</strong>
 </div>
-
       <strong>${data.payload.pull_request.title}</strong>
-</div>
+      (<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.number}</a>)
+
 `;
 
             for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
@@ -95,8 +96,7 @@ var formatPayload = function (eventType, data) {
             }
 
             out += `
-			(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.number}</a>)
-
+</div>
 			<p>
 			<span class="diff-stat"><span style="color: green;">+${data.payload.pull_request.additions}</span> / <span style="color: red;">-${data.payload.pull_request.deletions}</span> , <span style="color: gray;">${data.payload.pull_request.changed_files}</span></span>
 			<span style="color: gray; "><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i></span>
