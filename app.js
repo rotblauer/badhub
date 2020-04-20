@@ -1,3 +1,4 @@
+var queryEntities = [];
 var formatPayload = function (eventType, data) {
     var out = "";
     switch (eventType) {
@@ -612,11 +613,16 @@ var doSnoop = function (query) {
     times = [];
     $(".instructions").hide();
     var qs = query.split(",");
+
+    // put in array format if only one entitity
     if (qs.length === 0) {
         if (query !== "") {
             qs = [query];
         }
     }
+
+    // set the global
+    queryEntities = qs;
 
     var deferreds = getResources(qs);
 

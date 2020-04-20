@@ -6,6 +6,15 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
+function onlyMatchQueriesEntities(value, index, self) {
+    for (var i = 0; i < queryEntities.length; i++) {
+        if (queryEntities[i].indexOf(value) >= 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 var didBuildCharts = false;
 
 var buildCharts = function() {
@@ -24,7 +33,7 @@ var buildCharts = function() {
 
     var actors = datas.map(function(item, index) {
         return item.actor.login;
-    }).filter(onlyUnique);
+    }).filter(onlyUnique).filter(onlyMatchQueriesEntities);
 
     // 1
 
