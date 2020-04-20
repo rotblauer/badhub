@@ -90,7 +90,7 @@ var buildHeatmap = function (params) {
     }
 
     // set the dimensions and margins of the graph
-    var rect = $("#" + params.dom).get(0).getBoundingClientRect();
+    var rect = $("#" + params.dom).parent().get(0).getBoundingClientRect();
     var margin = {};
     margin.top = function () {
         if (params.margin && params.margin.top) {
