@@ -284,5 +284,27 @@ var buildCharts = function () {
     $("#all-charts").append($(`<div id="${paramsRepoEventTypes.dom}"></div>`));
     buildHeatmap(paramsRepoEventTypes);
 
+    // --------------------------------------------------------------
+
+    var paramsRepoActor = {
+        dom: "chart-repo-actor",
+        title: "Individual Activity by Repository",
+        data: state.data,
+        domain: actors,
+        dataDomainFn: function (data) {
+            return data.actor.login;
+        },
+        range: repositories,
+        dataRangeFn: function (data) {
+            return data.repo.name || "";
+        },
+        margin: {
+            top: 300
+        }
+    };
+
+    $("#all-charts").append($(`<div id="${paramsRepoActor.dom}"></div>`));
+    buildHeatmap(paramsRepoActor);
+
     didBuildCharts = true;
 };
