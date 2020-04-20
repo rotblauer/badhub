@@ -75,7 +75,8 @@ var buildCharts = function () {
             return data.actor.login;
         },
         margin: {
-            top: 200
+            top: 200,
+            right: 300
         }
     };
 
@@ -88,7 +89,7 @@ var buildCharts = function () {
     }
     var paramsActorHours = {
         dom: "chart-actor-hours",
-        title: "Individual Workday Hours, Shown in Your Local Time (UTC" + moment().utcOffset()/60 + ")",
+        title: "Individual Workday Hours, Shown in Your Local Time (UTC" + moment().utcOffset() / 60 + ")",
         data: state.data,
         domain: hours,
         range: actors,
@@ -109,7 +110,7 @@ var buildCharts = function () {
     var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].reverse();
     var paramsWeekdayHours = {
         dom: "chart-group-weekday-hours",
-        title: "Group Weekday Hours, Shown in Your Local Time (UTC" + moment().utcOffset()/60 + ")",
+        title: "Group Weekday Hours, Shown in Your Local Time (UTC" + moment().utcOffset() / 60 + ")",
         data: state.data,
         domain: hours,
         range: weekdays,
@@ -133,7 +134,7 @@ var buildCharts = function () {
     // get a tally of all actor-events
     var eventTallies = {};
     $.each(state.data, function (index, el) {
-        eventTallies[el.type] = typeof(eventTallies[el.type]) === "undefined" ? 1 : eventTallies[el.type] + 1;
+        eventTallies[el.type] = typeof (eventTallies[el.type]) === "undefined" ? 1 : eventTallies[el.type] + 1;
         return;
     });
     // so that we can sort the array by events with the most events first
@@ -214,7 +215,7 @@ var buildCharts = function () {
     // repositories daily for last 30 days
     // domain: repositories
     // range: last 30 days
-    var repositories = state.data.map(function(data) {
+    var repositories = state.data.map(function (data) {
         if (data.repo) {
             return data.repo.name;
         }
@@ -239,18 +240,22 @@ var buildCharts = function () {
         return repoTallies[a] - repoTallies[b];
     });
 
+    if (repositories.length > 25) {
+        repositories = repositories.slice(repositories.length - 26, repositories.length - 1)
+    }
+
     // --------------------------------------------------------------
 
     var paramsRepoDays = {
         dom: "chart-repo-days",
-        title: "Repository Activity By Date (last 30 days)",
+        title: "Repository Activity By Date (top 25 repos, last 30 days)",
         data: state.data,
-        range: days,
-        domain: repositories,
-        dataRangeFn: function (data) {
+        domain: days,
+        dataDomainFn: function (data) {
             return moment(data.created_at).format(fmt);
         },
-        dataDomainFn: function (data) {
+        range: repositories, // truncate repositories list to 25
+        dataRangeFn: function (data) {
             return data.repo.name;
         },
         margin: {
@@ -266,13 +271,13 @@ var buildCharts = function () {
 
     var paramsRepoEventTypes = {
         dom: "chart-repo-event-types",
-        title: "Event Type by Repository",
+        title: "Event Type by Repository (top 25 repos, last 30 days)",
         data: state.data,
         domain: events,
-        range: repositories,
         dataDomainFn: function (data) {
             return data.type;
         },
+        range: repositories, // truncate repositories list to 25
         dataRangeFn: function (data) {
             return data.repo.name;
         },
@@ -288,13 +293,13 @@ var buildCharts = function () {
 
     var paramsRepoActor = {
         dom: "chart-repo-actor",
-        title: "Individual Activity by Repository",
+        title: "Individual Activity by Repository (top 25 repos, last 30 days)",
         data: state.data,
         domain: actors,
         dataDomainFn: function (data) {
             return data.actor.login;
         },
-        range: repositories,
+        range: repositories, // truncate repositories list to 25
         dataRangeFn: function (data) {
             return data.repo.name || "";
         },

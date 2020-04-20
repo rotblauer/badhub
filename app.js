@@ -112,14 +112,17 @@ var formatPayload = function (eventType, data) {
 
         case "IssueCommentEvent":
             out = `
-<div class="comment-issue-pr-payload">
+<!--payload-->
+<div class="comment-issue-pr-payload"> 
 
+<!--header-->
 <div class="comment-header">
+
 <div class="event-user-action-container">
       &nbsp;<span class="pr-user-login">@${data.payload.issue.user.login}</span>
 </div>
-<span style="color: #bbb">@</span>
-&nbsp;<strong>${data.payload.issue.title}</strong>
+
+<span style="color: #bbb">@</span>&nbsp;<strong>${data.payload.issue.title}</strong>
 `;
 
             for (var j = 0; j < data.payload.issue.labels.length; j++) {
@@ -129,19 +132,22 @@ var formatPayload = function (eventType, data) {
             }
 
             out += `
-      &nbsp;(<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
-</div>
-`;
+                  &nbsp;(<a href="${data.payload.issue.html_url}" target="_">#${data.payload.issue.number}</a>)
+
+            </div>
+<!--end header-->`;
 
             out += `<div class="issue-body">`;
             out += md.render(data.payload.issue.body);
             out += `</div>`;
 
             out += `
-<div class="payload-comment">
-<a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
-${md.render(data.payload.comment.body)}
-</div>
+            <div class="payload-comment">
+            <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+            <div class="issue-body">
+            ${md.render(data.payload.comment.body)}
+            </div>
+            </div>  
 
 </div>
 			`;
@@ -258,7 +264,6 @@ ${md.render(data.payload.comment.body)}
 }
 
 var times = [];
-var eventIDs = [];
 
 var loadEventTypePrefs = function () {
     var l = localStorage.getItem("badhub-eventtypeshidden");
@@ -518,16 +523,19 @@ var snoopOK = function (data, textStatus, request) {
             }
             row.find(".issue-body").on("click", function () {
                 console.log("issue body clicked");
-                if (typeof $(this) === "undefined" ||  $(this) === null) { return; }
+                if (typeof $(this) === "undefined" || $(this) === null) {
+                    return;
+                }
                 $(this).toggleClass("issue-body-expanded");
             });
             if (j === 0) {
                 $(`#tabledata`).prepend(row);
             } else {
-                $(`#tabledata > tr:nth-child(${j})`).after(row);
+                $("#tabledata > tr:nth-child(" + j + ")").after(row);
             }
         })(data[i]);
     }
+
     return true;
 };
 

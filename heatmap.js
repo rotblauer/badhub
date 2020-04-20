@@ -76,7 +76,6 @@ var buildHeatmap = function (params) {
         }
     }
 
-
     // Initialize aggregate flattened list data.
     // Use range_domain valuation.
     var myData = [];
@@ -89,10 +88,6 @@ var buildHeatmap = function (params) {
             });
         }
     }
-
-    // console.log("range", params.range);
-    // console.log("domain", params.domain);
-    // console.log("mydata", myData);
 
     // set the dimensions and margins of the graph
     var rect = $("#" + params.dom).get(0).getBoundingClientRect();
@@ -288,14 +283,12 @@ var buildHeatmap = function (params) {
                 return "translate(-6, -" + domainFinder(d) + ")";
             })
 
-
         xaxis.selectAll("g.x.axis g.tick line")
             .style("color", "black")
             .attr("y2", domainFinder)
             .attr("transform", function (d) {
                 return "translate(0,-" + domainFinder(d) + ")";
             });
-
 
         // order matters here
         // warning: brittle logic
