@@ -240,6 +240,7 @@ var buildCharts = function () {
         return repoTallies[a] - repoTallies[b];
     });
 
+    // Truncate repositories charted to the most active 25.
     if (repositories.length > 25) {
         repositories = repositories.slice(repositories.length - 26, repositories.length - 1)
     }
@@ -250,12 +251,12 @@ var buildCharts = function () {
         dom: "chart-repo-days",
         title: "Repository Activity By Date (top 25 repos, last 30 days)",
         data: state.data,
-        domain: days,
-        dataDomainFn: function (data) {
+        range: days,
+        dataRangeFn: function (data) {
             return moment(data.created_at).format(fmt);
         },
-        range: repositories, // truncate repositories list to 25
-        dataRangeFn: function (data) {
+        domain: repositories, // truncate repositories list to 25
+        dataDomainFn: function (data) {
             return data.repo.name;
         },
         margin: {

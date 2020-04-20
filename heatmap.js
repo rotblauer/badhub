@@ -220,7 +220,7 @@ var buildHeatmap = function (params) {
                 .duration(200)
                 .style("opacity", 0.9);
             tooltipDiv.html("<strong>" + d.value + "</strong>&nbsp;(" + d.range + " @ " + d.domain + ")")
-                .style("left", (d3.event.pageX) + "px")
+                .style("left", (d3.event.pageX + 10) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
         })
         .on("mouseout", function (d) {
@@ -359,14 +359,44 @@ var buildHeatmap = function (params) {
                     .attr("xlink:href", "https://github.com/" + d3.select(this).text())
                     .on("mouseover", function (d, i) {
                         d3.select(this).style("color", "dodgerblue");
+                        tooltipDiv.transition()
+                            .duration(200)
+                            .style("opacity", 0.9);
+                        tooltipDiv.html("<strong>" + "github.com/" + d + "</strong>")
+                            .style("left", (d3.event.pageX + 10) + "px")
+                            .style("top", (d3.event.pageY - 28) + "px");
                     })
                     .on("mouseout", function (d, i) {
                         d3.select(this).style("color", "#b3afaf");
+                        tooltipDiv.transition()
+                            .duration(500)
+                            .style("opacity", 0);
                     })
-                    .on("click", function(d, i) {
+                    .on("click", function (d, i) {
                         window.open("https://github.com/" + d3.select(this).text(), "_blank")
                     })
                 ;
+
+                /*
+                        .on("mouseover", function (d) {
+            if (d.value == 0) {
+                return;
+            }
+            tooltipDiv.transition()
+                .duration(200)
+                .style("opacity", 0.9);
+            tooltipDiv.html("<strong>" + d.value + "</strong>&nbsp;(" + d.range + " @ " + d.domain + ")")
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function (d) {
+            if (d.value == 0) {
+                return;
+            }
+            tooltipDiv.transition()
+                .duration(500)
+                .style("opacity", 0);
+                * */
                 // var oldParent = this.parentNode;
                 // var newParent = document.createElement("a");
                 // newParent.href = "https://github.com/" + d3.select(this).text();
