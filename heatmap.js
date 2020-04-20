@@ -2,23 +2,36 @@
 // domain is an array of values (eg hours, days, repos)
 // range is an array of values (eg actors)
 // valueFn
-var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainFn, dataRangeFn) {
+/*
+  dom string
+  title string
+  data array of objects
+  domain array of primitives... or anything
+  range array of primitives... or anything
+  dataDomainFn function to get domain value from an object in the data
+  dataRangeFn function to get range value from an object in the data
+  }
+*/
+
+var buildHeatmap = function(params) {
+
+    console.log("build heatmap", params);
 
     // initialize data
     var myNewData = []; // items will be objects
-    for (var i = 0; i < range.length; i++) {
+    for (var i = 0; i < params.range.length; i++) {
         myNewData.push([]);
-        for (var j = 0; j < domain.length; j++) {
+        for (var j = 0; j < params.domain.length; j++) {
             myNewData[i][j] = 0;
         }
     }
 
     // now we need to build the sums of domain/range hits
     var maxValue = 0;
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < params.data.length; i++) {
 
-        var rangeV = dataRangeFn(data[i]);
-        var rangeIndex = range.indexOf(rangeV);
+        var rangeV = params.dataRangeFn(params.data[i]);
+        var rangeIndex = params.range.indexOf(rangeV);
         if (rangeIndex < -1) {
             continue;
         }
@@ -26,8 +39,8 @@ var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainF
         // // get index of event group (here, date)
         // var at = moment(data[i].created_at).hour();
 
-        var domainV = dataDomainFn(data[i]);
-        var domainIndex = domain.indexOf(domainV);
+        var domainV = params.dataDomainFn(params.data[i]);
+        var domainIndex = params.domain.indexOf(domainV);
         if (domainIndex < -1) {
             continue;
         }
@@ -44,18 +57,18 @@ var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainF
     }
 
     var myData = [];
-    for (var i = 0; i < range.length; i++) {
-        for (var j = 0; j < domain.length; j++) {
+    for (var i = 0; i < params.range.length; i++) {
+        for (var j = 0; j < params.domain.length; j++) {
             myData.push({
-                range: range[i],
-                domain: domain[j],
+                range: params.range[i],
+                domain: params.domain[j],
                 value: myNewData[i][j]
             });
         }
     }
 
-    console.log("range", range);
-    console.log("domain", domain);
+    console.log("range", params.range);
+    console.log("domain", params.domain);
     console.log("mydata", myData);
 
     // set the dimensions and margins of the graph
@@ -69,7 +82,7 @@ var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainF
         height = 450 - margin.top - margin.bottom;
 
     // append the svg object to the body of the page
-    var svg = d3.select(domSelector)
+    var svg = d3.select(params.dom)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -80,7 +93,7 @@ var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainF
     // Build X scales and axis:
     var x = d3.scaleBand()
         .range([0, width])
-        .domain(domain)
+        .domain(params.domain)
         .padding(0.01);
     var xaxis = svg.append("g")
         .attr("transform", "translate(0," + height + ")")
@@ -89,12 +102,15 @@ var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainF
         .attr("font-size", "1.2em")
         .attr("font-family", "monospace");
 
-    if (/Event$/igm.test(domain[0])) {
+    if (/Event$/igm.test(params.domain[0])) {
         xaxis.selectAll("text").each(function(d, i) {
             var thisText = d3.select(this).text();
-            d3.select(this).text(eventIconFromName(thisText));
+            var iconName = eventIconFromName(thisText);
+            if (iconName !== "") {
+                d3.select(this).text(iconName);
+            }
         }).attr("font-size", 24);
-    } else if (/[a-zA-Z]/igm.test(domain[0])) {
+    } else if (/[a-zA-Z]/igm.test(params.domain[0])) {
         xaxis.selectAll("text")
             .attr("text-anchor", "end")
             .attr("transform", function(d) {
@@ -105,12 +121,12 @@ var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainF
     // Build X scales and axis:
     var y = d3.scaleBand()
         .range([height, 0])
-        .domain(range)
+        .domain(params.range)
         .padding(0.01);
     var yaxis = svg.append("g")
         .call(d3.axisLeft(y));
     yaxis.selectAll("text").attr("font-size", "1.6em").attr("font-family", "monospace");
-    if (/Actors by/igm.test(title)) {
+    if (/Actors by/igm.test(params.title)) {
         yaxis.selectAll("text").each(function(d, i) {
             d3.select(this).text("@"+d3.select( this ).text());
         });
@@ -175,7 +191,7 @@ var buildHeatmap = function(domSelector, title, data, domain, range, dataDomainF
         .style("font-size", "16px")
         .style("font-weight", "bold")
         .style("text-decoration", "none")
-        .text(title);
+        .text(params.title);
 
 
 };

@@ -365,28 +365,16 @@ var buildRow = function (d) {
     ${formatEventName(d)}
     <span style="color: #bbb">${d.type === "PushEvent" ? d.payload.commits.length : ""}</span>
     </span>
-</td>
-`);
+</td>`);
 
-    var $payload = $(`
-<td class="apayload" >
-    ${formatPayload(d.type, d)}
-</td>
-`);
+    var $payload = $(`<td class="apayload" >${formatPayload(d.type, d)}</td>`);
 
-    var $time = $(`
-<td style="color: #ccc;">
-    ${minimalTimeDisplay(moment(d.created_at))}
-</td>
-`);
+    var $time = $(`<td style="color: #ccc;">${minimalTimeDisplay(moment(d.created_at))}</td>`);
 
-    var $details = $(`
-<td class="details" style="font-size: 0.8em;">
-</td>
-`);
-    var $deets = $(`
-        <code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>
-`);
+    var $details = $(`<td class="details" style="font-size: 0.8em;"></td>`);
+
+    var $deets = $(`<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>`);
+
     $details.append($deets);
     $tr.append($avatar);
     $tr.append($actor);

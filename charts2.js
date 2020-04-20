@@ -41,43 +41,82 @@ var buildCharts = function() {
     for (var i = 0; i < 24; i++) {
         hours.push(i);
     }
-
-    buildHeatmap("#dchart", "Activity Tally: Actors by Hour (shown in local time)", datas, hours, actors, function(data) {
-        return moment(data.created_at).local().hour();
-    }, function(data) {
-        return data.actor.login;
-    });
+    var paramsActorHours = {
+        dom: "#dchart",
+        title: "Activity Tally: Actors by Hour (shown in local time)",
+        data: eligibleData,
+        domain: hours,
+        range: actors,
+        dataDomainFn: function(data) {
+            return moment(data.created_at).local().hour();
+        },
+        dataRangeFn: function(data) {
+            return data.actor.login;
+        }
+    };
+    buildHeatmap(paramsActorHours);
 
     // 2
 
+
     // https://momentjs.com/docs/#/get-set/day/ Sunday=0, Saturday=6
     var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].reverse();
-    buildHeatmap("#dchart2", "Activity Tally: Weekdays by Hours (shown in local time)", datas, hours, weekdays, function(data) {
-        return moment(data.created_at).local().hour();
-    }, function(data) {
-        return weekdays[moment(data.created_at).day()];
-    });
+    var paramsWeekdayHours = {
+        dom: "#dchart2",
+        title: "Activity Tally: Weekdays by Hour (shown in local time)",
+        data: eligibleData,
+        domain: hours,
+        range: weekdays,
+        dataDomainFn: function(data) {
+            return moment(data.created_at).local().hour();
+        },
+        dataRangeFn: function(data) {
+            return weekdays[moment(data.created_at).day()];
+        }
+    };
+    buildHeatmap(paramsWeekdayHours);
 
+    // 3
     var days = [];
     for (var i = 30; i >= 0; i--) {
         var d = moment().subtract(i, "day").format("ddd, MMM D");
         days.push(d);
     }
-    buildHeatmap("#dchart3", "Activity Tally: Actors by Dates (last 30 days)", datas, days, actors, function(data) {
-        return moment(data.created_at).format("ddd, MMM D");;
-    }, function(data) {
-        return data.actor.login;
-    });
 
+    var paramsActorDates = {
+        dom: "#dchart3",
+        title: "Activity Tally: Actors by Date (last 30 days)",
+        data: eligibleData,
+        domain: days,
+        range: actors,
+        dataDomainFn: function(data) {
+            return moment(data.created_at).format("ddd, MMM D");;
+        },
+        dataRangeFn: function(data) {
+            return data.actor.login;
+        }
+    };
+    buildHeatmap(paramsActorDates);
+
+    // 4
 
     var uniqueEventTypes = datas.map(function(item, index) {
         return item.type;
     }).filter(onlyUnique);
-    buildHeatmap("#dchart4", "Activity Tally: Actors by Event Types", datas, uniqueEventTypes, actors, function(data) {
-        return data.type;
-    }, function(data) {
-        return data.actor.login;
-    });
+    var paramsActorsEventTypes = {
+        dom: "#dchart4",
+        title: "Activity Tally: Actors by Event Type",
+        data: eligibleData,
+        domain: uniqueEventTypes,
+        range: actors,
+        dataDomainFn: function(data) {
+            return data.type;
+        },
+        dataRangeFn: function(data) {
+            return data.actor.login;
+        }
+    };
+    buildHeatmap(paramsActorsEventTypes);
 
     didBuildCharts = true;
 };
