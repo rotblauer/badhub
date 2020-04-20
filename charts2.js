@@ -52,50 +52,8 @@ var buildCharts = function () {
         return actorTallies[a] - actorTallies[b];
     });
 
-    var hours = [];
-    for (var i = 0; i < 24; i++) {
-        hours.push(i);
-    }
-    var paramsActorHours = {
-        dom: "chart-actor-hours",
-        title: "Individual Workday Hours, Shown in Your Local Time (UTC" + moment().utcOffset()/60 + ")",
-        data: state.data,
-        domain: hours,
-        range: actors,
-        dataDomainFn: function (data) {
-            return moment(data.created_at).local().hour();
-        },
-        dataRangeFn: function (data) {
-            return data.actor.login;
-        },
-        margin: {
-            top: 200
-        }
-    };
-
-    // 2
-
-    // https://momentjs.com/docs/#/get-set/day/ Sunday=0, Saturday=6
-    var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].reverse();
-    var paramsWeekdayHours = {
-        dom: "chart-group-weekday-hours",
-        title: "Group Weekday Hours, Shown in Your Local Time (UTC" + moment().utcOffset()/60 + ")",
-        data: state.data,
-        domain: hours,
-        range: weekdays,
-        dataDomainFn: function (data) {
-            return moment(data.created_at).local().hour();
-        },
-        dataRangeFn: function (data) {
-            return weekdays[moment(data.created_at).day()];
-        },
-        margin: {
-            top: 200
-        }
-    };
-
-
-    // 3
+    // --------------------------------------------------------------
+    // ACTIVITY CALENDAR (Last 30 Days).
 
     var days = [];
     var fmt = "dddd, MMM D";
@@ -121,7 +79,52 @@ var buildCharts = function () {
         }
     };
 
-    // 4
+    // --------------------------------------------------------------
+    // 
+
+    var hours = [];
+    for (var i = 0; i < 24; i++) {
+        hours.push(i);
+    }
+    var paramsActorHours = {
+        dom: "chart-actor-hours",
+        title: "Individual Workday Hours, Shown in Your Local Time (UTC" + moment().utcOffset()/60 + ")",
+        data: state.data,
+        domain: hours,
+        range: actors,
+        dataDomainFn: function (data) {
+            return moment(data.created_at).local().hour();
+        },
+        dataRangeFn: function (data) {
+            return data.actor.login;
+        },
+        margin: {
+            top: 200
+        }
+    };
+
+    // --------------------------------------------------------------
+
+    // https://momentjs.com/docs/#/get-set/day/ Sunday=0, Saturday=6
+    var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].reverse();
+    var paramsWeekdayHours = {
+        dom: "chart-group-weekday-hours",
+        title: "Group Weekday Hours, Shown in Your Local Time (UTC" + moment().utcOffset()/60 + ")",
+        data: state.data,
+        domain: hours,
+        range: weekdays,
+        dataDomainFn: function (data) {
+            return moment(data.created_at).local().hour();
+        },
+        dataRangeFn: function (data) {
+            return weekdays[moment(data.created_at).day()];
+        },
+        margin: {
+            top: 200
+        }
+    };
+
+    // --------------------------------------------------------------
 
     var events = state.data.map(function (item, index) {
         return item.type;
@@ -155,6 +158,8 @@ var buildCharts = function () {
         }
     };
 
+    // --------------------------------------------------------------
+
     $("#all-charts").append($(`<div id="${paramsActorDates.dom}" style="margin-top:80px;"></div>`));
     buildHeatmap(paramsActorDates);
 
@@ -167,8 +172,7 @@ var buildCharts = function () {
     $("#all-charts").append($(`<div id="${paramsWeekdayHours.dom}" style=""></div>`));
     buildHeatmap(paramsWeekdayHours);
 
-
-    // 5
+    // --------------------------------------------------------------
 
     // for each actor, get their workaday hours
     // domain: hours
@@ -204,7 +208,9 @@ var buildCharts = function () {
         buildHeatmap(pars);
     }
 
-    // 6
+    // --------------------------------------------------------------
+    // repositories business
+
     // repositories daily for last 30 days
     // domain: repositories
     // range: last 30 days
@@ -233,6 +239,8 @@ var buildCharts = function () {
         return repoTallies[a] - repoTallies[b];
     });
 
+    // --------------------------------------------------------------
+
     var paramsRepoDays = {
         dom: "chart-repo-days",
         title: "Repository Activity By Date (last 30 days)",
@@ -254,6 +262,7 @@ var buildCharts = function () {
     var repoDaySVG = buildHeatmap(paramsRepoDays);
     repoDaySVG.selectAll("g.x.axis text").attr("font-size", "0.8em");
 
+    // --------------------------------------------------------------
 
     var paramsRepoEventTypes = {
         dom: "chart-repo-event-types",
