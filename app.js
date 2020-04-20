@@ -327,7 +327,7 @@ var buildRow = function (d) {
 </td>
 `);
     var $repo = $(`
-<td style="text-align: right; padding-right: 5px;">
+<td style="text-align: right; padding-right: 5px;" class="repo-td">
     <a href="https://github.com/${d.repo.name}" target="_" style="display: block;">${d.repo.name}</a>
 </td>
 `);
@@ -345,7 +345,7 @@ var buildRow = function (d) {
 
     var $details = $(`<td class="details" style="font-size: 0.8em;"></td>`);
 
-    var $deets = $(`<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>`);
+    var $deets = $(`<!--<code style="max-height: 2em; overflow: hidden;" >${JSON.stringify(d, null, 4)}</code>-->`);
 
     $details.append($deets);
     $tr.append($avatar);
@@ -354,7 +354,7 @@ var buildRow = function (d) {
     $tr.append($fmt);
     $tr.append($payload);
     $tr.append($time);
-    $tr.append($details);
+    // $tr.append($details);
     return $tr;
 };
 
@@ -432,7 +432,7 @@ var snoopOK = function (data, textStatus, request) {
 							<th style="text-align: left;">event</th>
                             <!-- <th>info</th> -->
                             <th></th>
-							<th class="details">payload</th>
+<!--							<th class="details">payload</th>-->
 						</tr>
 						</thead>
 						<tbody id="tabledata">
