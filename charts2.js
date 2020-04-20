@@ -179,6 +179,13 @@ var buildCharts = function () {
     // domain: hours
     // range: weekday
     // data: user
+    var individualWeedkayCalendarHolder = $("<div></div>").css({"width": "1000px"});
+    individualWeedkayCalendarHolder.append($("<p>Individual Workday Hours</p>").css({
+        "font-size": "16px",
+        "font-weight": "bold",
+        "margin-left": 20
+    }));
+    $("#all-charts").append(individualWeedkayCalendarHolder);
     for (var i = 0; i < actors.length; i++) {
         var person = actors[i];
         var personData = state.data.filter(function (val) {
@@ -186,7 +193,7 @@ var buildCharts = function () {
         });
         var pars = {
             dom: "chart-individual-week-" + person,
-            title: `Weekly: ${person}`,
+            title: `${person}`,
             data: personData,
             range: weekdays,
             domain: hours,
@@ -205,7 +212,7 @@ var buildCharts = function () {
             xAxisDisable: true,
             yAxisDisable: true,
         };
-        $("#all-charts").append($(`<div id="${pars.dom}" class="individual-workday-pattern-chart"></div>`).css({"width": "25%"}));
+        individualWeedkayCalendarHolder.append($(`<div id="${pars.dom}" class="individual-workday-pattern-chart"></div>`));
         buildHeatmap(pars);
     }
 
@@ -249,7 +256,7 @@ var buildCharts = function () {
 
     var paramsRepoDays = {
         dom: "chart-repo-days",
-        title: "Repository Activity By Date (top 25 repos, last 30 days)",
+        title: "Group Repository Activity By Date (top 25 repos, last 30 days)",
         data: state.data,
         range: days,
         dataRangeFn: function (data) {
@@ -272,7 +279,7 @@ var buildCharts = function () {
 
     var paramsRepoEventTypes = {
         dom: "chart-repo-event-types",
-        title: "Event Type by Repository (top 25 repos, last 30 days)",
+        title: "Group Event Type by Repository (top 25 repos, last 30 days)",
         data: state.data,
         domain: events,
         dataDomainFn: function (data) {

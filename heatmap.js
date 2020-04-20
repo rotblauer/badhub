@@ -90,7 +90,7 @@ var buildHeatmap = function (params) {
     }
 
     // set the dimensions and margins of the graph
-    var rect = $("#" + params.dom).parent().get(0).getBoundingClientRect();
+    var rect = $("#" + params.dom).get(0).getBoundingClientRect();
     var margin = {};
     margin.top = function () {
         if (params.margin && params.margin.top) {
@@ -120,6 +120,17 @@ var buildHeatmap = function (params) {
             return 20;
         }
     }()
+
+    // HACK
+    // If max is greater than margin top,
+    // and xaxis will be alpa (words, eg names), then
+    // extend the top margin so labels on their
+    // bar-chart style ticks don't get cut off.
+    var biggestLabelHeight = 250;
+    var guessTopMarginNeeds = maxRangeDomainValue + biggestLabelHeight + 10;
+    if (/[a-zA-Z]+/igm.test(params.domain[0]) && guessTopMarginNeeds > margin.top ) {
+        margin.top = guessTopMarginNeeds;
+    }
 
     var width = rect.right - rect.left - margin.left - margin.right;
 
