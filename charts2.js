@@ -69,7 +69,7 @@ var buildCharts = function () {
             return data.actor.login;
         },
         margin: {
-            top: 100
+            top: 200
         }
     };
 
@@ -90,7 +90,7 @@ var buildCharts = function () {
             return weekdays[moment(data.created_at).day()];
         },
         margin: {
-            top: 100
+            top: 200
         }
     };
 
@@ -117,7 +117,7 @@ var buildCharts = function () {
             return data.actor.login;
         },
         margin: {
-            top: 100
+            top: 200
         }
     };
 
@@ -151,7 +151,7 @@ var buildCharts = function () {
             return data.actor.login;
         },
         margin: {
-            top: 100
+            top: 200
         }
     };
 
@@ -192,11 +192,12 @@ var buildCharts = function () {
                 return moment(data.created_at).local().hour();
             },
             margin: {
-                top: 80,
+                top: 30,
                 right: 20,
-                bottom: 10,
+                bottom: 40,
                 left: 20
             },
+            xAxisDisable: true,
             yAxisDisable: true,
         };
         $("#all-charts").append($(`<div id="${pars.dom}" class="individual-workday-pattern-chart"></div>`).css({"width": "25%"}));
@@ -245,7 +246,7 @@ var buildCharts = function () {
             return data.repo.name;
         },
         margin: {
-            top: 250
+            top: 300
         }
     };
 
@@ -267,7 +268,7 @@ var buildCharts = function () {
             return data.repo.name;
         },
         margin: {
-            top: 150
+            top: 300
         }
     };
 

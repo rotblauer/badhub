@@ -184,10 +184,15 @@ var buildHeatmap = function (params) {
         var xgen = d3.axisTop(x).tickSize(0);
         if (/^\d+$/igm.test(params.domain[0])) {
             xgen.tickValues(params.domain.map(function (d, i) {
-                if (i % 4 === 0) {
-                    return d;
-                }
-                return "";
+
+                // Noop, just return the value.
+                return d;
+
+                // // Only show ticks at interval=4.
+                // if (i % 4 === 0) {
+                //     return d;
+                // }
+                // return "";
             }));
         }
 
@@ -203,6 +208,43 @@ var buildHeatmap = function (params) {
             .attr("font-size", "1.2em")
             .attr("font-family", "monospace");
 
+
+        var domainFinder = function (d) {
+            //d for the tick line is the value
+            //of that tick
+            //(a number between 0 and 1, in this case)
+
+            // get domain index (d is tick value)
+
+            var domainIndex = params.domain.indexOf(d);
+            if (domainIndex < 0) {
+                console.log("out of domain", d, domainIndex, params.domain, domain_range_Data); // should never happen
+                return 0;
+            }
+            var sum = sumAll(domain_range_Data[domainIndex]);
+            // console.log("->", d, sum, domainIndex, domain_domain_Data[domainIndex], domain_domain_Data);
+            return sum;
+        };
+
+        xaxis.selectAll("text")
+            .attr("text-anchor", "start")
+            .attr("transform", function (d) {
+                var shouldRotate = ""+d.length >= 2 && !/^\d+$/igm.test(d)
+                if (shouldRotate) {
+                    return "translate(0, -" + domainFinder(d) + "), rotate(-90), translate(8, 8)";
+                }
+                return "translate(-6, -" + domainFinder(d) + ")";
+            })
+
+
+        xaxis.selectAll("g.x.axis g.tick line")
+            .style("color", "black")
+            .attr("y2", domainFinder)
+            .attr("transform", function (d) {
+                return "translate(0,-" + domainFinder(d) + ")";
+            });
+
+
         // order matters here
         // warning: brittle logic
         // Replace raw _Event names with their icons.
@@ -217,13 +259,17 @@ var buildHeatmap = function (params) {
                     }
                 });
         }
-        if (/[a-zA-Z]/igm.test(params.domain[0])) {
-            xaxis.selectAll("text")
-                .attr("text-anchor", "start")
-                .attr("transform", function (d) {
-                    return "rotate(-45)";
-                });
-        }
+        // if (/[a-zA-Z]/igm.test(params.domain[0])) {
+        //     xaxis.selectAll("text")
+        //         .attr("text-anchor", "start")
+        //         .attr("transform", function (d) {
+        //             return "rotate(-45)";
+        //         });
+        // }
+
+        xaxis.selectAll("text")
+            .style("color", "#b3afaf")
+
     }
 
     if (!params.yAxisDisable) {
