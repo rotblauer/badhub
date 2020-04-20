@@ -1,5 +1,5 @@
 var apikey = "";
-var pageLimit = 3; // 10 pages is API max // 30 events per page // TODO FIXME add a user-configurable feature here
+var pageLimit = 10; // 10 pages is API max // 30 events per page // TODO FIXME add a user-configurable feature here
 
 var state = {
     eventIDs: [],
