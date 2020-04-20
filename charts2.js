@@ -199,7 +199,7 @@ var buildCharts = function () {
             },
             yAxisDisable: true,
         };
-        $("#all-charts").append($(`<div id=${pars.dom} class="individual-workday-pattern-chart"></div>`).css({"width": "25%"}));
+        $("#all-charts").append($(`<div id="${pars.dom}" class="individual-workday-pattern-chart"></div>`).css({"width": "25%"}));
         buildHeatmap(pars);
     }
 
@@ -249,11 +249,30 @@ var buildCharts = function () {
         }
     };
 
-    $("#all-charts").append($(`<div id=${paramsRepoDays.dom}></div>`));
-    var repoSVG = buildHeatmap(paramsRepoDays);
-    repoSVG.selectAll("g.x.axis text").attr("font-size", "0.8em");
+    $("#all-charts").append($(`<div id="${paramsRepoDays.dom}" style="margin-top: 80px;"></div>`));
+    var repoDaySVG = buildHeatmap(paramsRepoDays);
+    repoDaySVG.selectAll("g.x.axis text").attr("font-size", "0.8em");
 
 
+    var paramsRepoEventTypes = {
+        dom: "chart-repo-event-types",
+        title: "Event Type by Repository",
+        data: state.data,
+        domain: events,
+        range: repositories,
+        dataDomainFn: function (data) {
+            return data.type;
+        },
+        dataRangeFn: function (data) {
+            return data.repo.name;
+        },
+        margin: {
+            top: 150
+        }
+    };
+
+    $("#all-charts").append($(`<div id="${paramsRepoEventTypes.dom}"></div>`));
+    buildHeatmap(paramsRepoEventTypes);
 
     didBuildCharts = true;
 };

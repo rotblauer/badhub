@@ -25,17 +25,25 @@ var buildHeatmap = function (params) {
 
     console.log("build heatmap", params);
 
-    // initialize data
-    var myNewData = []; // items will be objects
+    // initialize cross sectional data
+    var range_domain_Data = []; // items will be objects
     for (var i = 0; i < params.range.length; i++) {
-        myNewData.push([]);
+        range_domain_Data.push([]);
         for (var j = 0; j < params.domain.length; j++) {
-            myNewData[i][j] = 0;
+            range_domain_Data[i][j] = 0;
+        }
+    }
+    var domain_range_Data = []; // items will be objects
+    for (var i = 0; i < params.domain.length; i++) {
+        domain_range_Data.push([]);
+        for (var j = 0; j < params.range.length; j++) {
+            domain_range_Data[i][j] = 0;
         }
     }
 
     // now we need to build the sums of domain/range hits
-    var maxValue = 0;
+    var maxRangeDomainValue = 0;
+    var maxDomainRangeValue = 0;
     for (var i = 0; i < params.data.length; i++) {
 
         var rangeV = params.dataRangeFn(params.data[i]);
@@ -54,30 +62,37 @@ var buildHeatmap = function (params) {
         }
 
         // finally, increment the tallies
-        myNewData[rangeIndex][domainIndex]++;
+        range_domain_Data[rangeIndex][domainIndex]++;
+        domain_range_Data[domainIndex][rangeIndex]++;
 
         // update the known max.
         // There is definitely a d3 way to do this.
         // Don't know it off the top of my head.
-        if (myNewData[rangeIndex][domainIndex] > maxValue) {
-            maxValue = myNewData[rangeIndex][domainIndex];
+        if (range_domain_Data[rangeIndex][domainIndex] > maxRangeDomainValue) {
+            maxRangeDomainValue = range_domain_Data[rangeIndex][domainIndex];
+        }
+        if (domain_range_Data[domainIndex][rangeIndex] > maxDomainRangeValue) {
+            maxDomainRangeValue = domain_range_Data[domainIndex][rangeIndex];
         }
     }
 
+
+    // Initialize aggregate flattened list data.
+    // Use range_domain valuation.
     var myData = [];
     for (var i = 0; i < params.range.length; i++) {
         for (var j = 0; j < params.domain.length; j++) {
             myData.push({
                 range: params.range[i],
                 domain: params.domain[j],
-                value: myNewData[i][j]
+                value: range_domain_Data[i][j]
             });
         }
     }
 
-    console.log("range", params.range);
-    console.log("domain", params.domain);
-    console.log("mydata", myData);
+    // console.log("range", params.range);
+    // console.log("domain", params.domain);
+    // console.log("mydata", myData);
 
     // set the dimensions and margins of the graph
     var rect = $("#" + params.dom).get(0).getBoundingClientRect();
@@ -117,8 +132,8 @@ var buildHeatmap = function (params) {
     // // Build color scale
     // var myColor = d3.scaleLinear()
     //     .range(["white", "#60bc52"])
-    //     .domain([0, maxValue]);
-    var myColor = d3.scaleSequentialSqrt([0, maxValue], d3.interpolatePuRd)
+    //     .domain([0, maxRangeDomainValue]);
+    var myColor = d3.scaleSequentialSqrt([0, maxRangeDomainValue], d3.interpolatePuRd)
 
     // Use one tooltip.
     var tooltipDiv = d3.select("body").append("div")
@@ -184,20 +199,24 @@ var buildHeatmap = function (params) {
 
         xaxis.select("path").style("color", "transparent");
 
-        // var xaxis = d3.axisTop()
-        //     .attr("transform", "translate(0," + 0 + ")")
-
-        // var xaxis = svg.append("g")
-        //     .attr("transform", "translate(0," + height + ")")
-        //     .attr("transform", "translate(0," + 0 + ")")
-        //     .call(d3.axisTop(x));
-
         xaxis.selectAll("text")
             .attr("font-size", "1.2em")
             .attr("font-family", "monospace");
 
         // order matters here
         // warning: brittle logic
+        // Replace raw _Event names with their icons.
+        if (/Event$/igm.test(params.domain[0])) {
+            xaxis.selectAll("text")
+                .each(function (d, i) {
+                    var thisText = d3.select(this).text();
+                    var thisTextTrimEvent = thisText.slice(0, thisText.indexOf("Event"));
+                    var iconName = eventIconFromName(thisText);
+                    if (iconName !== "") {
+                        d3.select(this).text(iconName + " " + thisTextTrimEvent);
+                    }
+                });
+        }
         if (/[a-zA-Z]/igm.test(params.domain[0])) {
             xaxis.selectAll("text")
                 .attr("text-anchor", "start")
@@ -248,11 +267,11 @@ var buildHeatmap = function (params) {
 
             var rangeIndex = params.range.indexOf(d);
             if (rangeIndex < 0) {
-                console.log("out of range", d, rangeIndex, params.range, myNewData); // should never happen
+                console.log("out of range", d, rangeIndex, params.range, range_domain_Data); // should never happen
                 return 0;
             }
-            var sum = sumAll(myNewData[rangeIndex]);
-            console.log("->", d, sum, rangeIndex, myNewData[rangeIndex], myNewData);
+            var sum = sumAll(range_domain_Data[rangeIndex]);
+            // console.log("->", d, sum, rangeIndex, range_domain_Data[rangeIndex], range_domain_Data);
             return sum;
         };
 
