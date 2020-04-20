@@ -97,10 +97,34 @@ var buildHeatmap = function (params) {
     // set the dimensions and margins of the graph
     var rect = $("#" + params.dom).get(0).getBoundingClientRect();
     var margin = {};
-    margin.top = function () { if (params.margin && params.margin.top) { return params.margin.top; } else { return 150; } }()
-    margin.right = function () { if (params.margin && params.margin.right) { return params.margin.right; } else { return rect.width / 4; } }()
-    margin.bottom = function () { if (params.margin && params.margin.bottom) { return params.margin.bottom; } else { return 100; } }()
-    margin.left = function () { if (params.margin && params.margin.left) { return params.margin.left; } else { return 20; } }()
+    margin.top = function () {
+        if (params.margin && params.margin.top) {
+            return params.margin.top;
+        } else {
+            return 150;
+        }
+    }()
+    margin.right = function () {
+        if (params.margin && params.margin.right) {
+            return params.margin.right;
+        } else {
+            return rect.width / 4;
+        }
+    }()
+    margin.bottom = function () {
+        if (params.margin && params.margin.bottom) {
+            return params.margin.bottom;
+        } else {
+            return 100;
+        }
+    }()
+    margin.left = function () {
+        if (params.margin && params.margin.left) {
+            return params.margin.left;
+        } else {
+            return 20;
+        }
+    }()
 
     var width = rect.right - rect.left - margin.left - margin.right;
 
@@ -134,6 +158,41 @@ var buildHeatmap = function (params) {
     //     .range(["white", "#60bc52"])
     //     .domain([0, maxRangeDomainValue]);
     var myColor = d3.scaleSequentialSqrt([0, maxRangeDomainValue], d3.interpolatePuRd)
+
+    var rangeFinder = function (d) {
+        //d for the tick line is the value
+        //of that tick
+        //(a number between 0 and 1, in this case)
+
+        // get range index (d is tick value)
+
+        var rangeIndex = params.range.indexOf(d);
+        if (rangeIndex < 0) {
+            console.log("out of range", d, rangeIndex, params.range, range_domain_Data); // should never happen
+            return 0;
+        }
+        var sum = sumAll(range_domain_Data[rangeIndex]);
+        // console.log("->", d, sum, rangeIndex, range_domain_Data[rangeIndex], range_domain_Data);
+        return sum;
+    };
+
+    var domainFinder = function (d) {
+        //d for the tick line is the value
+        //of that tick
+        //(a number between 0 and 1, in this case)
+
+        // get domain index (d is tick value)
+
+        var domainIndex = params.domain.indexOf(d);
+        if (domainIndex < 0) {
+            console.log("out of domain", d, domainIndex, params.domain, domain_range_Data); // should never happen
+            return 0;
+        }
+        var sum = sumAll(domain_range_Data[domainIndex]);
+        // console.log("->", d, sum, domainIndex, domain_domain_Data[domainIndex], domain_domain_Data);
+        return sum;
+    };
+
 
     // Use one tooltip.
     var tooltipDiv = d3.select("body").append("div")
@@ -178,6 +237,19 @@ var buildHeatmap = function (params) {
                 .style("opacity", 0);
         });
 
+    // title
+    svg.append("text")
+        .attr("x", 0)
+        .attr("y", 0 - margin.top + 16) // - (margin.top / 2))
+        // .attr("y", height + (margin.bottom / 2))
+        // .attr("y", 0-height+margin.top+margin.bottom - (margin.bottom / 2))
+        .attr("text-anchor", "left")
+        .style("font-size", "16px")
+        .style("font-weight", "bold")
+        .style("text-decoration", "none")
+        .text(params.title);
+
+
     if (!params.xAxisDisable) {
 
         // only use every 4th tick for numerical values
@@ -198,38 +270,18 @@ var buildHeatmap = function (params) {
 
         var xaxis = svg.append("g")
             .attr("class", "x axis")
-            // .attr("transform", "translate(0," + height + ")")
             .attr("transform", "translate(0," + -1 + ")")
             .call(xgen);
 
         xaxis.select("path").style("color", "transparent");
 
         xaxis.selectAll("text")
+            .attr("class", "x axis label")
             .attr("font-size", "1.2em")
-            .attr("font-family", "monospace");
-
-
-        var domainFinder = function (d) {
-            //d for the tick line is the value
-            //of that tick
-            //(a number between 0 and 1, in this case)
-
-            // get domain index (d is tick value)
-
-            var domainIndex = params.domain.indexOf(d);
-            if (domainIndex < 0) {
-                console.log("out of domain", d, domainIndex, params.domain, domain_range_Data); // should never happen
-                return 0;
-            }
-            var sum = sumAll(domain_range_Data[domainIndex]);
-            // console.log("->", d, sum, domainIndex, domain_domain_Data[domainIndex], domain_domain_Data);
-            return sum;
-        };
-
-        xaxis.selectAll("text")
+            .attr("font-family", "monospace")
             .attr("text-anchor", "start")
             .attr("transform", function (d) {
-                var shouldRotate = ""+d.length >= 2 && !/^\d+$/igm.test(d)
+                var shouldRotate = "" + d.length >= 2 && !/^\d+$/igm.test(d)
                 if (shouldRotate) {
                     return "translate(0, -" + domainFinder(d) + "), rotate(-90), translate(8, 8)";
                 }
@@ -282,13 +334,15 @@ var buildHeatmap = function (params) {
             .style("color", "transparent");
 
         yaxis.selectAll("text")
-            .attr("transform", "translate(4, 0)")
-            .attr("font-size", "1.3em")
-            .attr("font-family", "monospace")
-            .style("color", "black")
-            .attr("class", "y axis label");
+            .attr("class", "y axis label")
+            .attr("font-size", "1em")
+            .style("color", "#b3afaf")
+            .attr("transform", function (d) {
+                // want offset on x axis
+                return "translate(4, 0), translate(" + rangeFinder(d) + ", 0)";
+            });
 
-        // Replace raw _Event names with their icons.
+        // Replace raw Event names with their icons.
         if (/Event$/igm.test(params.range[0])) {
             yaxis.selectAll("text")
                 .each(function (d, i) {
@@ -299,36 +353,34 @@ var buildHeatmap = function (params) {
                         d3.select(this).text(iconName + " " + thisTextTrimEvent);
                     }
                 });
-
-            // If the range item ends in 'day', then format label text specially.
-            // } else if (/day\b/igm.test(params.range[0])) {
         }
 
-        var rangeFinder = function (d) {
-            //d for the tick line is the value
-            //of that tick
-            //(a number between 0 and 1, in this case)
+        // Add links to repositories.
+        svg.selectAll("text")
+            .each(function (d, i) {
+                // If it does not have slash in the name, don't add a link..
+                if (!/.+\//igm.test(d)) {
+                    return;
+                }
+                d3.select(this)
+                    .attr("xlink:href", "https://github.com/" + d3.select(this).text())
+                    .on("mouseover", function (d, i) {
+                        d3.select(this).style("color", "dodgerblue");
+                    })
+                    .on("mouseout", function (d, i) {
+                        d3.select(this).style("color", "#b3afaf");
+                    })
+                    .on("click", function(d, i) {
+                        window.open("https://github.com/" + d3.select(this).text(), "_blank")
+                    })
+                ;
+                // var oldParent = this.parentNode;
+                // var newParent = document.createElement("a");
+                // newParent.href = "https://github.com/" + d3.select(this).text();
+                // oldParent.replaceChild(newParent, this);
+                // newParent.appendChild(this);
 
-            // get range index (d is tick value)
-
-            var rangeIndex = params.range.indexOf(d);
-            if (rangeIndex < 0) {
-                console.log("out of range", d, rangeIndex, params.range, range_domain_Data); // should never happen
-                return 0;
-            }
-            var sum = sumAll(range_domain_Data[rangeIndex]);
-            // console.log("->", d, sum, rangeIndex, range_domain_Data[rangeIndex], range_domain_Data);
-            return sum;
-        };
-
-        yaxis.selectAll("text")
-            .attr("font-size", "0.8em")
-            .style("color", "#b3afaf")
-            .attr("transform", function (d) {
-                // want offset on x axis
-                return "translate(" + rangeFinder(d) + ", 0)";
-            })
-            ;
+            });
 
         yaxis.selectAll("g.y.axis g.tick line")
             .style("color", "black")
@@ -337,18 +389,6 @@ var buildHeatmap = function (params) {
 
     }
 
-
-    // title
-    svg.append("text")
-        .attr("x", 0)
-        .attr("y", 0 - margin.top + 16) // - (margin.top / 2))
-        // .attr("y", height + (margin.bottom / 2))
-        // .attr("y", 0-height+margin.top+margin.bottom - (margin.bottom / 2))
-        .attr("text-anchor", "left")
-        .style("font-size", "16px")
-        .style("font-weight", "bold")
-        .style("text-decoration", "none")
-        .text(params.title);
 
     return svg;
 };
