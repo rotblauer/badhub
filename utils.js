@@ -1,8 +1,18 @@
 var apikey = "";
 var pageLimit = 3; // 10 pages is API max // 30 events per page // TODO FIXME add a user-configurable feature here
 
-var eligibleData = [];
-var eligibleActors = [];
+var state = {
+    eventIDs: [],
+    data: [],
+    queryEntities: [],
+    actors: [],
+    repositories: [],
+    eventTypes: []
+};
+
+
+// var eligibleData = [];
+// var queryEntities = [];
 
 var actionColor = function (action) {
     switch (action) {
@@ -188,4 +198,40 @@ var isProjectManagement = function (data) {
 var eventTypesPreferHidden = [];
 var eventTypeIsPreferredHidden = function (eventType) {
     return eventTypesPreferHidden.indexOf(eventType) > -1;
+};
+
+
+
+var eventRowBG = function (data) {
+    if (data.type == "DeleteEvent") {
+        return "#ffebeb";
+    }
+    if (data.payload.push_id) {
+        return "#dfedff80";
+        // return "#edffff";
+    }
+    if (!data.payload.action) {
+        return "none";
+    }
+    var action = data.payload.action === "closed" && data.payload.pull_request && data.payload.pull_request.merged ? "merged" : data.payload.action;
+    switch (action) {
+        case "created":
+            if (/Comment/igm.test(data.type)) {
+                return "#fffdeb";
+            }
+            return "#f4fff4";
+        case "opened":
+            return "#f4fff4";
+        case "reopened":
+            return "#f4fffa";
+        case "edited":
+            return "#fff0e9";
+        case "closed":
+            return "#fff1f1";
+        case "published":
+            return "#edfbff";
+        case "merged":
+            return "#f3e9ff";
+    }
+    return "none";
 };

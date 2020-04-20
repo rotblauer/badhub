@@ -1,4 +1,4 @@
-var queryEntities = [];
+
 var formatPayload = function (eventType, data) {
     var out = "";
     switch (eventType) {
@@ -296,39 +296,6 @@ var insertTimesYieldsI = function (t) {
     return times.length - 1;
 };
 
-var eventRowBG = function (data) {
-    if (data.type == "DeleteEvent") {
-        return "#ffebeb";
-    }
-    if (data.payload.push_id) {
-        return "#dfedff80";
-        // return "#edffff";
-    }
-    if (!data.payload.action) {
-        return "none";
-    }
-    var action = data.payload.action === "closed" && data.payload.pull_request && data.payload.pull_request.merged ? "merged" : data.payload.action;
-    switch (action) {
-        case "created":
-            if (/Comment/igm.test(data.type)) {
-                return "#fffdeb";
-            }
-            return "#f4fff4";
-        case "opened":
-            return "#f4fff4";
-        case "reopened":
-            return "#f4fffa";
-        case "edited":
-            return "#fff0e9";
-        case "closed":
-            return "#fff1f1";
-        case "published":
-            return "#edfbff";
-        case "merged":
-            return "#f3e9ff";
-    }
-    return "none";
-};
 
 var buildRow = function (d) {
     if (!valueOk(d)) {
@@ -478,7 +445,7 @@ var snoopOK = function (data, textStatus, request) {
         (function (d) {
 
             // already have this event from some other entity
-            if (eventIDs.indexOf(d.id) >= 0) {
+            if (state.eventIDs.indexOf(d.id) >= 0) {
                 return;
             }
 
@@ -532,8 +499,8 @@ var snoopOK = function (data, textStatus, request) {
                     );
             }
 
-            eventIDs.push(d.id);
-            eligibleData.push(d);
+            state.eventIDs.push(d.id);
+            state.data.push(d);
 
             var j = insertTimesYieldsI(d.created_at);
             var row = buildRow(d);
@@ -600,19 +567,18 @@ var doSnoop = function (query) {
     localStorage.setItem("badhub-query", query);
     times = [];
     $(".instructions").hide();
-    var qs = query.split(",");
+
+    // set the global
+    state.queryEntities = query.split(",");
 
     // put in array format if only one entitity
-    if (qs.length === 0) {
+    if (state.queryEntities.length === 0) {
         if (query !== "") {
-            qs = [query];
+            state.queryEntities = [query];
         }
     }
 
-    // set the global
-    queryEntities = qs;
-
-    var deferreds = getResources(qs);
+    var deferreds = getResources(state.queryEntities);
 
     $.when(...deferreds).then(function() {
         if ( $("#all-charts").hasClass("hidden") ) {
