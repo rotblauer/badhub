@@ -76,54 +76,12 @@ var buildCharts = function () {
         },
         margin: {
             top: 200,
-            right: 300
+            // right: 300
         }
     };
 
-    // --------------------------------------------------------------
-    // 
-
-    var hours = [];
-    for (var i = 0; i < 24; i++) {
-        hours.push(i);
-    }
-    var paramsActorHours = {
-        dom: "chart-actor-hours",
-        title: "Individual Workday Hours, Shown in Your Local Time (UTC" + moment().utcOffset() / 60 + ")",
-        data: state.data,
-        domain: hours,
-        range: actors,
-        dataDomainFn: function (data) {
-            return moment(data.created_at).local().hour();
-        },
-        dataRangeFn: function (data) {
-            return data.actor.login;
-        },
-        margin: {
-            top: 200
-        }
-    };
-
-    // --------------------------------------------------------------
-
-    // https://momentjs.com/docs/#/get-set/day/ Sunday=0, Saturday=6
-    var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].reverse();
-    var paramsWeekdayHours = {
-        dom: "chart-group-weekday-hours",
-        title: "Group Weekday Hours, Shown in Your Local Time (UTC" + moment().utcOffset() / 60 + ")",
-        data: state.data,
-        domain: hours,
-        range: weekdays,
-        dataDomainFn: function (data) {
-            return moment(data.created_at).local().hour();
-        },
-        dataRangeFn: function (data) {
-            return weekdays[moment(data.created_at).day()];
-        },
-        margin: {
-            top: 200
-        }
-    };
+    $("#all-charts").append($(`<div id="${paramsActorDates.dom}" style="margin-top:80px;"></div>`));
+    buildHeatmap(paramsActorDates);
 
     // --------------------------------------------------------------
 
@@ -159,62 +117,8 @@ var buildCharts = function () {
         }
     };
 
-    // --------------------------------------------------------------
-
-    $("#all-charts").append($(`<div id="${paramsActorDates.dom}" style="margin-top:80px;"></div>`));
-    buildHeatmap(paramsActorDates);
-
     $("#all-charts").append($(`<div id="${paramsActorsEventTypes.dom}" style=""></div>`));
     buildHeatmap(paramsActorsEventTypes);
-
-    $("#all-charts").append($(`<div id="${paramsActorHours.dom}" style=""></div>`));
-    buildHeatmap(paramsActorHours);
-
-    $("#all-charts").append($(`<div id="${paramsWeekdayHours.dom}" style=""></div>`));
-    buildHeatmap(paramsWeekdayHours);
-
-    // --------------------------------------------------------------
-
-    // for each actor, get their workaday hours
-    // domain: hours
-    // range: weekday
-    // data: user
-    var individualWeedkayCalendarHolder = $("<div></div>").css({"width": "1000px"});
-    individualWeedkayCalendarHolder.append($("<p>Individual Workday Hours</p>").css({
-        "font-size": "16px",
-        "font-weight": "bold",
-        "margin-left": 20
-    }));
-    $("#all-charts").append(individualWeedkayCalendarHolder);
-    for (var i = 0; i < actors.length; i++) {
-        var person = actors[i];
-        var personData = state.data.filter(function (val) {
-            return val.actor.login == person;
-        });
-        var pars = {
-            dom: "chart-individual-week-" + person,
-            title: `${person}`,
-            data: personData,
-            range: weekdays,
-            domain: hours,
-            dataRangeFn: function (data) {
-                return weekdays[moment(data.created_at).day()];
-            },
-            dataDomainFn: function (data) {
-                return moment(data.created_at).local().hour();
-            },
-            margin: {
-                top: 30,
-                right: 20,
-                bottom: 40,
-                left: 20
-            },
-            xAxisDisable: true,
-            yAxisDisable: true,
-        };
-        individualWeedkayCalendarHolder.append($(`<div id="${pars.dom}" class="individual-workday-pattern-chart"></div>`));
-        buildHeatmap(pars);
-    }
 
     // --------------------------------------------------------------
     // repositories business
@@ -254,54 +158,9 @@ var buildCharts = function () {
 
     // --------------------------------------------------------------
 
-    var paramsRepoDays = {
-        dom: "chart-repo-days",
-        title: "Group Repository Activity By Date (top 25 repos, last 30 days)",
-        data: state.data,
-        range: days,
-        dataRangeFn: function (data) {
-            return moment(data.created_at).format(fmt);
-        },
-        domain: repositories, // truncate repositories list to 25
-        dataDomainFn: function (data) {
-            return data.repo.name;
-        },
-        margin: {
-            top: 300
-        }
-    };
-
-    $("#all-charts").append($(`<div id="${paramsRepoDays.dom}" style="margin-top: 80px;"></div>`));
-    var repoDaySVG = buildHeatmap(paramsRepoDays);
-    repoDaySVG.selectAll("g.x.axis text").attr("font-size", "0.8em");
-
-    // --------------------------------------------------------------
-
-    var paramsRepoEventTypes = {
-        dom: "chart-repo-event-types",
-        title: "Group Event Type by Repository (top 25 repos, last 30 days)",
-        data: state.data,
-        domain: events,
-        dataDomainFn: function (data) {
-            return data.type;
-        },
-        range: repositories, // truncate repositories list to 25
-        dataRangeFn: function (data) {
-            return data.repo.name;
-        },
-        margin: {
-            top: 300
-        }
-    };
-
-    $("#all-charts").append($(`<div id="${paramsRepoEventTypes.dom}"></div>`));
-    buildHeatmap(paramsRepoEventTypes);
-
-    // --------------------------------------------------------------
-
     var paramsRepoActor = {
         dom: "chart-repo-actor",
-        title: "Individual Activity by Repository (top 25 repos, last 30 days)",
+        title: "Individual Activity by Repository (top 25 repos)",
         data: state.data,
         domain: actors,
         dataDomainFn: function (data) {
@@ -318,6 +177,148 @@ var buildCharts = function () {
 
     $("#all-charts").append($(`<div id="${paramsRepoActor.dom}"></div>`));
     buildHeatmap(paramsRepoActor);
+
+    // --------------------------------------------------------------
+
+    var paramsRepoEventTypes = {
+        dom: "chart-repo-event-types",
+        title: "Group Repository Activity by Event Typebs (top 25 repos)",
+        data: state.data,
+        domain: repositories, // truncate repositories list to 25
+        dataDomainFn: function (data) {
+            return data.repo.name || "";
+        },
+        range: events,
+        dataRangeFn: function (data) {
+            return data.type;
+        },
+        margin: {
+            top: 400
+        }
+    };
+
+    $("#all-charts").append($(`<div id="${paramsRepoEventTypes.dom}"></div>`));
+    buildHeatmap(paramsRepoEventTypes);
+
+    // --------------------------------------------------------------
+
+    var paramsRepoDays = {
+        dom: "chart-repo-days",
+        title: "Group Repository Activity By Date (top 25 repos)",
+        data: state.data,
+        domain: repositories, // truncate repositories list to 25
+        dataDomainFn: function (data) {
+            return data.repo.name || "";
+        },
+        range: days,
+        dataRangeFn: function (data) {
+            return moment(data.created_at).format(fmt);
+        },
+        margin: {
+            top: 400
+        }
+    };
+
+    $("#all-charts").append($(`<div id="${paramsRepoDays.dom}" style="margin-top: 80px;"></div>`));
+    var repoDaySVG = buildHeatmap(paramsRepoDays);
+    repoDaySVG.selectAll("g.x.axis text").attr("font-size", "0.8em");
+
+
+    // --------------------------------------------------------------
+
+    var hours = [];
+    for (var i = 0; i < 24; i++) {
+        hours.push(i);
+    }
+
+    // https://momentjs.com/docs/#/get-set/day/ Sunday=0, Saturday=6
+    var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].reverse();
+    var paramsWeekdayHours = {
+        dom: "chart-group-weekday-hours",
+        title: "Group Weekday Hours, Shown in Your Local Time (UTC" + moment().utcOffset() / 60 + ")",
+        data: state.data,
+        domain: hours,
+        range: weekdays,
+        dataDomainFn: function (data) {
+            return moment(data.created_at).local().hour();
+        },
+        dataRangeFn: function (data) {
+            return weekdays[moment(data.created_at).day()];
+        },
+        margin: {
+            top: 200
+        }
+    };
+
+    $("#all-charts").append($(`<div id="${paramsWeekdayHours.dom}" style=""></div>`));
+    buildHeatmap(paramsWeekdayHours);
+
+    // --------------------------------------------------------------
+    //
+
+    var paramsActorHours = {
+        dom: "chart-actor-hours",
+        title: "Individual Workday Hours, Shown in Your Local Time (UTC" + moment().utcOffset() / 60 + ")",
+        data: state.data,
+        domain: hours,
+        range: actors,
+        dataDomainFn: function (data) {
+            return moment(data.created_at).local().hour();
+        },
+        dataRangeFn: function (data) {
+            return data.actor.login;
+        },
+        margin: {
+            top: 200
+        }
+    };
+
+    $("#all-charts").append($(`<div id="${paramsActorHours.dom}" style=""></div>`));
+    buildHeatmap(paramsActorHours);
+
+
+    // --------------------------------------------------------------
+
+    // for each actor, get their workaday hours
+    // domain: hours
+    // range: weekday
+    // data: user
+    var individualWeedkayCalendarHolder = $("<div></div>").css({"margin-right": "100px"});
+    individualWeedkayCalendarHolder.append($("<p>Individual Workday Hours</p>").css({
+        "font-size": "16px",
+        "font-weight": "bold",
+        "margin-left": 20
+    }));
+    $("#all-charts").append(individualWeedkayCalendarHolder);
+    for (var i = 0; i < actors.length; i++) {
+        var person = actors[i];
+        var personData = state.data.filter(function (val) {
+            return val.actor.login == person;
+        });
+        var pars = {
+            dom: "chart-individual-week-" + person,
+            title: `${person}`,
+            data: personData,
+            range: weekdays,
+            domain: hours,
+            dataRangeFn: function (data) {
+                return weekdays[moment(data.created_at).day()];
+            },
+            dataDomainFn: function (data) {
+                return moment(data.created_at).local().hour();
+            },
+            margin: {
+                top: 30,
+                right: 20,
+                bottom: 40,
+                left: 20
+            },
+            xAxisDisable: true,
+            yAxisDisable: true,
+        };
+        individualWeedkayCalendarHolder.append($(`<div id="${pars.dom}" class="individual-workday-pattern-chart"></div>`));
+        buildHeatmap(pars);
+    }
 
     didBuildCharts = true;
 };

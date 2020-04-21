@@ -454,14 +454,14 @@ var snoopOK = function (data, textStatus, request) {
                 return;
             }
 
-            // filter by date, leaving out old events
-            // othewise all users will have same number of events since the getter is
-            // governed by the pager
-            var createdAt = Date.parse(d.created_at);
-            var age = Date.now() - createdAt;
-            if (convertMS(age).day > 14) {
-                return;
-            }
+            // // filter by date, leaving out old events
+            // // othewise all users will have same number of events since the getter is
+            // // governed by the pager
+            // var createdAt = Date.parse(d.created_at);
+            // var age = Date.now() - createdAt;
+            // if (convertMS(age).day > 14) {
+            //     return;
+            // }
 
             if (isAutomatedPushEvent(d)) {
                 return;
@@ -556,7 +556,7 @@ var queryEntity = function (q) {
     // });
 
      return $.ajax({
-        url: `/data/${q.resource}/all.json`,
+        url: `http://localhost:8002/${q.resource}/all.json.gz`,
         dataType: 'json',
         type: "GET",
         contentType: 'application/json',
@@ -569,10 +569,10 @@ var queryEntity = function (q) {
 var getResources = function(qs) {
     var deferreds = [];
     for (var i = 0; i < qs.length; i++) {
-        for (var page = 1; page <= pageLimit; page++) {
-            var prom = (queryEntity)({resource: qs[i], page: page, apikey: apikey});
+        // for (var page = 1; page <= pageLimit; page++) {
+            var prom = (queryEntity)({resource: qs[i], page: "noop", apikey: apikey});
             deferreds.push(prom);
-        }
+        // }
     }
     console.log("deferreds len", deferreds.length);
     return deferreds;
