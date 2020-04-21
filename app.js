@@ -545,14 +545,25 @@ var snoopNOTOK = function (err) {
 };
 
 var queryEntity = function (q) {
+
+    //  return $.ajax({
+    //     url: `https://api.github.com/${q.resource}/events?access_token=${q.apikey}&page=${q.page}`,
+    //     dataType: 'json',
+    //     type: "GET",
+    //     contentType: 'application/json',
+    //     success: snoopOK,
+    //     error: snoopNOTOK,
+    // });
+
      return $.ajax({
-        url: `https://api.github.com/${q.resource}/events?access_token=${q.apikey}&page=${q.page}`,
+        url: `/data/${q.resource}/all.json`,
         dataType: 'json',
         type: "GET",
         contentType: 'application/json',
         success: snoopOK,
         error: snoopNOTOK,
     });
+
 };
 
 var getResources = function(qs) {
