@@ -221,7 +221,7 @@ var buildCharts = function () {
 
     $("#all-charts").append($(`<div id="${paramsRepoDays.dom}" style="margin-top: 80px;"></div>`));
     var repoDaySVG = buildHeatmap(paramsRepoDays);
-    repoDaySVG.selectAll("g.x.axis text").attr("font-size", "0.8em");
+    // repoDaySVG.selectAll("g.x.axis text").attr("font-size", "0.8em");
 
 
     // --------------------------------------------------------------

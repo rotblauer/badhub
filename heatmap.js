@@ -337,10 +337,20 @@ var buildHeatmap = function (params) {
         yaxis.select("path")
             .style("color", "transparent");
 
+        var labelColor = "#b3afaf";
+
+        function dlabelColor(d, i) {
+            if (/(saturday|sunday)\,/igm.test(d)) {
+                return "#fff";
+                // return "#D8D4D4";
+            }
+            return labelColor
+        }
+
         yaxis.selectAll("text")
             .attr("class", "y axis label")
             .attr("font-size", "1em")
-            .style("color", "#b3afaf")
+            .style("color", dlabelColor)
             .attr("transform", function (d) {
                 // want offset on x axis
                 return "translate(4, 0), translate(" + rangeFinder(d) + ", 0)";
@@ -362,6 +372,7 @@ var buildHeatmap = function (params) {
         // Add links to repositories.
         svg.selectAll("text")
             .each(function (d, i) {
+
                 // If it does not have slash in the name, don't add a link..
                 if (!/.+\//igm.test(d)) {
                     return;
@@ -378,7 +389,7 @@ var buildHeatmap = function (params) {
                             .style("top", (d3.event.pageY - 28) + "px");
                     })
                     .on("mouseout", function (d, i) {
-                        d3.select(this).style("color", "#b3afaf");
+                        d3.select(this).style("color", dlabelColor());
                         tooltipDiv.transition()
                             .duration(500)
                             .style("opacity", 0);

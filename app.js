@@ -556,9 +556,13 @@ var queryEntity = function (q) {
     // });
 
      return $.ajax({
-        url: `http://localhost:8002/${q.resource}/all.json.gz`,
+        url: `/archive/data/${q.resource}/all.json`,
         dataType: 'json',
+         crossDomain: true,
         type: "GET",
+         headers: {
+           "Accept-Encoding": "gzip,deflate",
+         },
         contentType: 'application/json',
         success: snoopOK,
         error: snoopNOTOK,
