@@ -50,7 +50,7 @@ var formatPayload = function (eventType, data) {
                 out += (function (c) {
                     return `
 						<div id="${c.sha}" class="commit">
-						<code>*</code> <a href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit"><code>${c.sha.substring(0, 8)}</code></a>
+						<code>*</code> <a style="color: lightblue;" href="${c.url.replace("api.", "").replace("repos/", "").replace("commits", "commit")}" target="_" class="commit"><code>${c.sha.substring(0, 8)}</code></a>
 						<code class="commit-branch">${data.payload.ref.replace("refs/heads/", "")}</code> <code class="commit-author">${c.author.name}</code> <code class="commit-message">${c.message}</code>
 						</div>
 					`;
