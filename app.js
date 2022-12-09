@@ -1,4 +1,42 @@
 
+
+var formatPayload_PullRequestReviewCommentEvent = function (data) {
+    let out = `
+<div class="comment-issue-pr-payload">
+<div class="comment-header">
+
+<div class="event-user-action-container">
+            &nbsp;(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.pull_request.number}</a>)
+            &nbsp;<span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
+</div>
+
+<span style="color: #bbb">@</span> <strong>${data.payload.pull_request.title}</strong>
+
+</div>
+`;
+
+    for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
+        out += (function (l) {
+            return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
+        })(data.payload.pull_request.labels[j]);
+    }
+
+    out += `
+<br>
+<div style="padding-left: 1em;">
+                <span style="color: gray; display: block; font-size: 1em;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
+</div>
+
+<div class="payload-comment">
+    <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
+    ${md.render( data.payload.comment.body)}
+</div>
+
+</div>
+			`;
+    return out;
+};
+
 var formatPayload = function (eventType, data) {
     var out = "";
     switch (eventType) {
@@ -70,7 +108,8 @@ var formatPayload = function (eventType, data) {
 </div>
             `;
             out += `<div class="issue-body">`;
-            out += md.render(data.payload.issue.body);
+            console.log("data.payload.issue.body", data.payload.issue.body);
+            out += md.render(data.payload.issue.body + "");
             out += `</div>`;
             break;
         // ---------------------------------------------------------------------------
@@ -103,7 +142,7 @@ var formatPayload = function (eventType, data) {
       </p>`;
 
             out += `<div class="issue-body">`;
-            out += md.render(data.payload.pull_request.body);
+            out += md.render(data.payload.pull_request.body + "");
             out += `</div>`;
 
             break;
@@ -138,14 +177,14 @@ var formatPayload = function (eventType, data) {
 <!--end header-->`;
 
             out += `<div class="issue-body">`;
-            out += md.render(data.payload.issue.body);
+            out += md.render(data.payload.issue.body + "");
             out += `</div>`;
 
             out += `
             <div class="payload-comment">
             <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
             <div class="issue-body">
-            ${md.render(data.payload.comment.body)}
+            ${md.render(data.payload.comment.body + "")}
             </div>
             </div>  
 
@@ -157,48 +196,30 @@ var formatPayload = function (eventType, data) {
 
 
         case "PullRequestReviewEvent":
-            out = `<h1 style="color: yellow;">PullRequestReviewEvent NOT IMPLEMENTED</h1>`;
+            // out = `<h1 style="color: yellow;">PullRequestReviewEvent NOT IMPLEMENTED</h1>`;
+            out = `<div>`;
+            let color = "gray";
+            switch (data.payload.review.state.toLowerCase()) {
+                case "approved":
+                    color = "green"
+                    break;
+                case "commented":
+                    color = "gray";
+                    break;
+                case "changes_requested":
+                    color = "#9f0000";
+                    break;
+            }
+
+            out += `<span style="color: ${color};">${data.payload.review.state.toLowerCase()}</span>`;
+            out += `<p>${data.payload.review.body || ""}</p>`;
+            out += `</div>`;
             break;
-
-
 
         // ---------------------------------------------------------------------------
 
         case "PullRequestReviewCommentEvent":
-
-            out = `
-<div class="comment-issue-pr-payload">
-<div class="comment-header">
-
-<div class="event-user-action-container">
-            &nbsp;(<a href="${data.payload.pull_request.html_url}" target="_">#${data.payload.pull_request.number}</a>)
-            &nbsp;<span class="pr-user-login">@${data.payload.pull_request.user.login}</span>
-</div>
-
-<span style="color: #bbb">@</span> <strong>${data.payload.pull_request.title}</strong>
-
-</div>
-`;
-
-            for (var j = 0; j < data.payload.pull_request.labels.length; j++) {
-                out += (function (l) {
-                    return `&nbsp;<span><small style="padding: 0.2em; border-radius: 0.2em; background-color: #${l.color}; color: ${invertColor(l.color, true)};">${l.name}</small></span>`;
-                })(data.payload.pull_request.labels[j]);
-            }
-
-            out += `
-<br>
-<div style="padding-left: 1em;">
-                <span style="color: gray; display: block; font-size: 1em;"><i>${data.payload.pull_request.base.label} < ${data.payload.pull_request.head.label}</i> </span>
-</div>
-
-<div class="payload-comment">
-    <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
-    ${md.render( data.payload.comment.body)}
-</div>
-
-</div>
-			`;
+            out = formatPayload_PullRequestReviewCommentEvent(data);
             break;
         // ---------------------------------------------------------------------------
 
@@ -312,7 +333,7 @@ var buildRow = function (d) {
         tdbg = `background-color: ${bg};`;
     }
     var $tr = $(`<tr></tr>`);
-    $tr.addClass("event-row").addClass(`even${d.type}`).addClass(`entity${d.actor.login}`);
+    $tr.addClass("event-row").addClass(`event${d.type}`).addClass(`entity${d.actor.login}`);
     if (eventTypeIsPreferredHidden(d.type)) {
         $tr.addClass("hidden");
     }
@@ -638,8 +659,9 @@ var setupAuthorizedListeners = function () {
         $(".details").toggle();
     });
     $("#eventTypes-toggleall").on("click", function () {
-        console.log("did clic");
+        console.log("did click");
         $("#eventTypes span").each(function (i) {
+            // console.debug("i", i, "this", $(this));
             $(`.event${$(this).attr("id")}`).toggleClass("hidden");
             $(this).toggleClass("bold");
         });
