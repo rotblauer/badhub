@@ -212,6 +212,7 @@ var formatPayload = function (eventType, data) {
             }
 
             out += `<span style="color: ${color};">${data.payload.review.state.toLowerCase()}</span>`;
+            out += `&nbsp;<a target="_" href="${data.payload.review.html_url}">${data.payload.review.html_url}</a>`;
             out += `<p>${data.payload.review.body || ""}</p>`;
             out += `</div>`;
             break;
