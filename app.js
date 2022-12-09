@@ -109,7 +109,7 @@ var formatPayload = function (eventType, data) {
             `;
             out += `<div class="issue-body">`;
             console.log("data.payload.issue.body", data.payload.issue.body);
-            out += md.render(data.payload.issue.body + "");
+            out += md.render(data.payload.issue.body || "");
             out += `</div>`;
             break;
         // ---------------------------------------------------------------------------
@@ -142,7 +142,7 @@ var formatPayload = function (eventType, data) {
       </p>`;
 
             out += `<div class="issue-body">`;
-            out += md.render(data.payload.pull_request.body + "");
+            out += md.render(data.payload.pull_request.body || "");
             out += `</div>`;
 
             break;
@@ -177,14 +177,14 @@ var formatPayload = function (eventType, data) {
 <!--end header-->`;
 
             out += `<div class="issue-body">`;
-            out += md.render(data.payload.issue.body + "");
+            out += md.render(data.payload.issue.body || "");
             out += `</div>`;
 
             out += `
             <div class="payload-comment">
             <a class="quote-comment-link" href="${data.payload.comment.html_url}" target="_" style="float:right;"><sup>\u{2934}</sup></a>
             <div class="issue-body">
-            ${md.render(data.payload.comment.body + "")}
+            ${md.render(data.payload.comment.body || "")}
             </div>
             </div>  
 
