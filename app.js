@@ -567,7 +567,6 @@ var queryEntity = function (q) {
         success: snoopOK,
         error: snoopNOTOK,
     });
-
 };
 
 var getResources = function(qs) {

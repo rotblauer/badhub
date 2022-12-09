@@ -230,7 +230,7 @@ var buildHeatmap = function (params) {
             tooltipDiv.transition()
                 .duration(200)
                 .style("opacity", 1);
-            tooltipDiv.html("<strong>" + d.value + "</strong>&nbsp;(" + d.range + " @ " + d.domain + ")")
+            tooltipDiv.html("<strong>" + d.value + "</strong>&nbsp;(" + d.domain + " @ " + d.range + ")")
                 .style("left", (d3.event.pageX + 10) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
         })
@@ -340,6 +340,12 @@ var buildHeatmap = function (params) {
         var labelColor = "#b3afaf";
 
         function dlabelColor(d, i) {
+            // If the label is today's data, turn it green.
+            // This SUPER HACKILY uses the hardcode date format from 'fmt' variable in
+            // the controller.
+            if (moment().format("dddd, MMM D") === d) {
+                return "rgb(40, 168, 36)";
+            }
             if (/(saturday|sunday)\,/igm.test(d)) {
                 return "#fff";
                 // return "#D8D4D4";

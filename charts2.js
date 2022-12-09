@@ -182,7 +182,7 @@ var buildCharts = function () {
 
     var paramsRepoEventTypes = {
         dom: "chart-repo-event-types",
-        title: "Group Repository Activity by Event Typebs (top 25 repos)",
+        title: "Group Repository Activity by Event Types (top 25 repos)",
         data: state.data,
         domain: repositories, // truncate repositories list to 25
         dataDomainFn: function (data) {
