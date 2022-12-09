@@ -546,27 +546,31 @@ var snoopNOTOK = function (err) {
 
 var queryEntity = function (q) {
 
+     // access_token=${q.apikey}&
+     return $.ajax({
+        url: `https://api.github.com/${q.resource}/events?page=${q.page}`,
+        dataType: 'json',
+        type: "GET",
+        contentType: 'application/json',
+         headers: {
+           'Authorization': `token ${q.apikey}`,
+         },
+        success: snoopOK,
+        error: snoopNOTOK,
+    });
+
     //  return $.ajax({
-    //     url: `https://api.github.com/${q.resource}/events?access_token=${q.apikey}&page=${q.page}`,
+    //     url: `/archive/data/${q.resource}/all.json`,
     //     dataType: 'json',
+    //      crossDomain: true,
     //     type: "GET",
+    //      headers: {
+    //        "Accept-Encoding": "gzip,deflate",
+    //      },
     //     contentType: 'application/json',
     //     success: snoopOK,
     //     error: snoopNOTOK,
     // });
-
-     return $.ajax({
-        url: `/archive/data/${q.resource}/all.json`,
-        dataType: 'json',
-         crossDomain: true,
-        type: "GET",
-         headers: {
-           "Accept-Encoding": "gzip,deflate",
-         },
-        contentType: 'application/json',
-        success: snoopOK,
-        error: snoopNOTOK,
-    });
 };
 
 var getResources = function(qs) {
